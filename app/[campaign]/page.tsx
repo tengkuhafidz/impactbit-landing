@@ -39,8 +39,9 @@ export default function CampaignPage({ params }: CampaignPageProps) {
     return () => clearInterval(timer)
   }, [campaignData.totalImpactUnits])
 
-  const handleDonation = (lessons: number, duration: string) => {
-    setShowConfirmation(`${campaignData.impactPromptAlt} ${lessons} ${campaignData.impactItem}${duration ? ` ${duration}` : ''} 🎉`)
+  const handleDonation = (units: number, description: string) => {
+    const itemLabel = units === 1 ? campaignData.impactItem.toLowerCase() : `${campaignData.impactItem.toLowerCase()}s`
+    setShowConfirmation(`${campaignData.impactPromptAlt} ${units} ${itemLabel}${description ? `${description}` : ''} 🎉`)
     setTimeout(() => setShowConfirmation(""), 3000)
   }
 
@@ -110,24 +111,18 @@ export default function CampaignPage({ params }: CampaignPageProps) {
           </div>
 
           <div className="space-y-4 mb-8">
-            <Button
-              onClick={() => handleDonation(7, "(1 week)")}
-              className="w-full h-14 text-lg bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-medium transition-all duration-200 hover:shadow-soft"
-            >
-              7 {campaignData.impactItem.toLowerCase()}s (1 week) → ${7 * campaignData.unitPrice}
-            </Button>
-            <Button
-              onClick={() => handleDonation(30, "(1 month)")}
-              className="w-full h-14 text-lg bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-medium transition-all duration-200 hover:shadow-soft"
-            >
-              30 {campaignData.impactItem.toLowerCase()}s (1 month) → ${30 * campaignData.unitPrice}
-            </Button>
-            <Button
-              onClick={() => handleDonation(365, "(1 year)")}
-              className="w-full h-14 text-lg gradient-accent text-accent-foreground rounded-xl font-medium transition-all duration-200 hover:shadow-soft"
-            >
-              365 {campaignData.impactItem.toLowerCase()}s (1 year) → ${(365 * campaignData.unitPrice).toLocaleString()}
-            </Button>
+            {campaignData.impactOptions.map((option, index) => {
+              const isHighlight = index === campaignData.impactOptions.length - 1
+              return (
+                <Button
+                  key={index}
+                  onClick={() => handleDonation(option.units, option.description ? ` (${option.description})` : "")}
+                  className={`w-full h-14 text-lg ${isHighlight ? "gradient-accent text-accent-foreground" : "bg-primary hover:bg-primary/90 text-primary-foreground"} rounded-xl font-medium transition-all duration-200 hover:shadow-soft`}
+                >
+                  {option.label} → ${(option.units * campaignData.unitPrice).toLocaleString()}
+                </Button>
+              )
+            })}
           </div>
 
           <div className="space-y-4">
@@ -138,13 +133,22 @@ export default function CampaignPage({ params }: CampaignPageProps) {
               onChange={(e) => setCustomLessons(e.target.value)}
               className="h-14 text-lg rounded-xl border-border bg-background"
             />
-            {customPrice > 0 && <p className="text-center text-xl font-medium text-foreground">= ${customPrice}</p>}
+            {customLessons && Number.parseInt(customLessons) > 0 && (
+              <div className="p-4 bg-secondary/50 rounded-xl space-y-2">
+                <p className="text-foreground font-medium">
+                  You are enabling {Number.parseInt(customLessons)} {Number.parseInt(customLessons) === 1 ? campaignData.impactItem.toLowerCase() : `${campaignData.impactItem.toLowerCase()}s`} every month
+                </p>
+                <p className="text-2xl font-semibold text-foreground">
+                  ${customPrice} monthly
+                </p>
+              </div>
+            )}
             <Button
               onClick={() => handleDonation(Number.parseInt(customLessons) || 0, "")}
               disabled={!customLessons || Number.parseInt(customLessons) <= 0}
               className="w-full h-14 text-lg bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-medium transition-all duration-200 hover:shadow-soft disabled:opacity-50"
             >
-              Enable Now
+              Commit to Monthly Impact
             </Button>
           </div>
 
@@ -219,7 +223,7 @@ export default function CampaignPage({ params }: CampaignPageProps) {
       <section className="px-6 py-24 gradient-primary text-center relative z-10">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-4xl md:text-6xl font-serif font-light text-primary-foreground mb-8 text-balance leading-tight">
-            Be part of this sacred mission.
+            Be part of this mission.
           </h2>
           <p className="text-xl text-primary-foreground/80 mb-12 max-w-2xl mx-auto">
             Enable {campaignData.impactItem.toLowerCase()}s today and join thousands making knowledge accessible worldwide.

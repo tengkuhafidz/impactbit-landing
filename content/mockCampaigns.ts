@@ -1,3 +1,10 @@
+export interface ImpactOption {
+    label: string
+    units: number
+    description?: string
+    isDefault?: boolean
+}
+
 export interface MockCampaign {
     id: string
     title: string
@@ -16,6 +23,7 @@ export interface MockCampaign {
     organisationName?: string
     impactPromptAlt?: string
     totalImpactUnits: number
+    impactOptions: ImpactOption[]
 }
 
 const quranbit: MockCampaign = {
@@ -34,7 +42,22 @@ const quranbit: MockCampaign = {
     impactPromptAlt: "📖 Enabled",
     isFullySponsored: false,
     isFeatured: true,
-    totalImpactUnits: 12000,
+    totalImpactUnits: 194964,
+    impactOptions: [
+        {
+            label: "1 quranbit lesson",
+            units: 1,
+            isDefault: true
+        },
+        {
+            label: "1 week of quranbit lessons",
+            units: 7
+        },
+        {
+            label: "1 month of quranbit lessons",
+            units: 30
+        }
+    ]
 }
 
 const communityPantry: MockCampaign = {
@@ -53,7 +76,22 @@ const communityPantry: MockCampaign = {
     impactPromptAlt: "🛒 Contributed",
     isFullySponsored: false,
     isFeatured: true,
-    totalImpactUnits: 9000,
+    totalImpactUnits: 20043,
+    impactOptions: [
+        {
+            label: "1 pantry item",
+            units: 1,
+            isDefault: true
+        },
+        {
+            label: "5 pantry items",
+            units: 5
+        },
+        {
+            label: "10 pantry items",
+            units: 10
+        }
+    ]
 }
 
 const freeFoodFoward: MockCampaign = {
@@ -72,11 +110,33 @@ const freeFoodFoward: MockCampaign = {
     impactPromptAlt: "🍱 Sponsored",
     isFullySponsored: false,
     isFeatured: true,
-    totalImpactUnits: 24000,
+    totalImpactUnits: 83363,
+    impactOptions: [
+        {
+            label: "1 food packet",
+            units: 1,
+            isDefault: true
+        },
+        {
+            label: "1 family",
+            units: 5,
+            description: "5 food packets"
+        },
+        {
+            label: "3 families",
+            units: 15,
+            description: "15 food packets"
+        },
+        {
+            label: "10 families",
+            units: 50,
+            description: "50 food packets"
+        }
+    ]
 }
 
 type MockCampaigns = Record<string, MockCampaign>;
 
-const mockCampaigns: MockCampaigns = {quranbit, "community-pantry": communityPantry, "infaq-friday": freeFoodFoward}
+const mockCampaigns: MockCampaigns = { quranbit, "community-pantry": communityPantry, "infaq-friday": freeFoodFoward }
 
 export default mockCampaigns;
