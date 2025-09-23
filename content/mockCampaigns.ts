@@ -28,7 +28,7 @@ export interface MockCampaign {
 
 const quranbit: MockCampaign = {
     id: "quranbit",
-    title: "QuranBit",
+    title: "Quranbit",
     description: "Gain rewards for every letter recited daily by thousands of students worldwide.",
     impactDescription: "1 lesson comprises a 5-7 minutes personalised Iqra' or Quran lesson conducted by certified Asatizah",
     impactItem: "Quranbit Lesson",

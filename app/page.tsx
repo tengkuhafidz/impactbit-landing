@@ -7,12 +7,12 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowRight, Heart, Users, TrendingUp, Star, Globe, BookOpen } from "lucide-react"
+import { ArrowRight, Heart, Users, TrendingUp, Star, DollarSign, Speaker, SpeakerIcon, Share, RefreshCcw, Share2 } from "lucide-react"
 
 export default function HomePage() {
   const campaigns = Object.values(mockCampaigns)
   const [animatedImpact, setAnimatedImpact] = useState(0)
-  
+
   // Calculate overall impact
   const totalImpact = campaigns.reduce((sum, campaign) => sum + campaign.totalImpactUnits, 0)
   const totalValue = campaigns.reduce((sum, campaign) => sum + (campaign.totalImpactUnits * campaign.unitPrice), 0)
@@ -57,10 +57,10 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="px-6 py-16 md:py-24 text-center max-w-6xl mx-auto relative z-10">
         <div className="animate-slide-up">
-          <p className="text-lg md:text-xl text-muted-foreground mb-6 font-light">Together, we've created</p>
-          <div className="number-glow mb-8">
-            <span className="text-8xl md:text-9xl lg:text-[10rem] font-serif font-light number-highlight leading-none block">
-              {animatedImpact.toLocaleString()}+
+          <p className="text-lg md:text-xl text-muted-foreground mb-2 font-light">Together, we've created</p>
+          <div className="number-glow mb-1 overflow-visible">
+            <span className="text-8xl md:text-9xl lg:text-[10rem] font-serif font-light number-highlight leading-tight block py-4">
+              {animatedImpact.toLocaleString()}
             </span>
           </div>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-light text-foreground mb-6 text-balance leading-tight">
@@ -92,45 +92,47 @@ export default function HomePage() {
       <section id="impact-stats" className="px-6 py-16 relative z-10">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
             <Card className="p-6 shadow-soft border-0 bg-card animate-scale-in" style={{ animationDelay: "0.1s" }}>
               <CardContent className="p-0">
                 <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
                   <Heart className="w-6 h-6 text-primary" />
                 </div>
                 <div className="text-3xl font-serif font-light text-foreground mb-1">{totalImpact.toLocaleString()}</div>
-                <p className="text-sm text-muted-foreground">Total Impact Units</p>
+                <p className="text-sm text-muted-foreground">Impact Created</p>
               </CardContent>
             </Card>
-            
+
             <Card className="p-6 shadow-soft border-0 bg-card animate-scale-in" style={{ animationDelay: "0.2s" }}>
               <CardContent className="p-0">
                 <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center mb-4">
                   <Users className="w-6 h-6 text-accent" />
                 </div>
-                <div className="text-3xl font-serif font-light text-foreground mb-1">{activeCampaigns}</div>
-                <p className="text-sm text-muted-foreground">Active Campaigns</p>
+                <div className="text-3xl font-serif font-light text-foreground mb-1">2,891</div>
+                <p className="text-sm text-muted-foreground">Impact Creators</p>
               </CardContent>
             </Card>
-            
+
+            <Card className="p-6 shadow-soft border-0 bg-card animate-scale-in" style={{ animationDelay: "0.4s" }}>
+              <CardContent className="p-0">
+                <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center mb-4">
+                  <Share2 className="w-6 h-6 text-accent" />
+                </div>
+                <div className="text-3xl font-serif font-light text-foreground mb-1">342</div>
+                <p className="text-sm text-muted-foreground">Impact Advocates</p>
+              </CardContent>
+            </Card>
+
             <Card className="p-6 shadow-soft border-0 bg-card animate-scale-in" style={{ animationDelay: "0.3s" }}>
               <CardContent className="p-0">
                 <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
                   <TrendingUp className="w-6 h-6 text-primary" />
                 </div>
-                <div className="text-3xl font-serif font-light text-foreground mb-1">${totalValue.toLocaleString()}</div>
-                <p className="text-sm text-muted-foreground">Total Value Generated</p>
+                <div className="text-3xl font-serif font-light text-foreground mb-1">{activeCampaigns}</div>
+                <p className="text-sm text-muted-foreground">Active Campaigns</p>
               </CardContent>
             </Card>
-            
-            <Card className="p-6 shadow-soft border-0 bg-card animate-scale-in" style={{ animationDelay: "0.4s" }}>
-              <CardContent className="p-0">
-                <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center mb-4">
-                  <Star className="w-6 h-6 text-accent" />
-                </div>
-                <div className="text-3xl font-serif font-light text-foreground mb-1">100%</div>
-                <p className="text-sm text-muted-foreground">Goes to Impact</p>
-              </CardContent>
-            </Card>
+
           </div>
         </div>
       </section>
@@ -142,14 +144,12 @@ export default function HomePage() {
             <h2 className="text-4xl md:text-5xl font-serif font-light text-foreground mb-4">Our Campaigns</h2>
             <p className="text-xl text-muted-foreground font-light">Choose how you want to make a difference</p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {campaigns.map((campaign, index) => {
-              const Icon = campaign.id === "quranbit" ? BookOpen : campaign.id === "community-pantry" ? Heart : Globe
-              
               return (
-                <Card 
-                  key={campaign.id} 
+                <Card
+                  key={campaign.id}
                   className="overflow-hidden border-0 shadow-soft bg-card hover:shadow-elegant transition-all duration-300 animate-scale-in"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
@@ -160,8 +160,8 @@ export default function HomePage() {
                       </Badge>
                     )}
                     <div className="mb-6">
-                      <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
-                        <Icon className="w-8 h-8 text-primary" />
+                      <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4 overflow-hidden">
+                        <img src={campaign.iconPath} alt={campaign.title} className="w-12 h-12 object-contain" />
                       </div>
                       <CardTitle className="text-2xl font-serif font-light">{campaign.title}</CardTitle>
                     </div>
@@ -169,12 +169,12 @@ export default function HomePage() {
                       {campaign.description}
                     </CardDescription>
                   </CardHeader>
-                  
+
                   <CardContent className="px-8 pb-6">
                     <div className="p-4 bg-secondary/50 rounded-xl mb-6">
                       <p className="text-sm text-foreground/80">{campaign.impactDescription}</p>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4 mb-6">
                       <div className="text-center p-3 bg-primary/5 rounded-xl">
                         <p className="text-2xl font-serif font-light text-primary">
@@ -187,17 +187,17 @@ export default function HomePage() {
                         <p className="text-xs text-muted-foreground mt-1">per {campaign.impactItem}</p>
                       </div>
                     </div>
-                    
+
                     {campaign.organisationName && (
                       <p className="text-sm text-muted-foreground text-center">
                         by {campaign.organisationName}
                       </p>
                     )}
                   </CardContent>
-                  
+
                   <CardFooter className="p-8 pt-0">
-                    <Button 
-                      className="w-full h-12 text-base bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-medium transition-all duration-200 hover:shadow-soft group" 
+                    <Button
+                      className="w-full h-12 text-base bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-medium transition-all duration-200 hover:shadow-soft group"
                       asChild
                     >
                       <Link href={`/${campaign.id}`}>

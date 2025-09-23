@@ -88,13 +88,13 @@ export default function CampaignPage({ params }: CampaignPageProps) {
       <section className="px-6 py-16 md:py-20 text-center max-w-6xl mx-auto relative z-10">
         <div className="animate-slide-up">
           <div className="mb-12">
-            <p className="text-lg md:text-xl text-muted-foreground mb-6 font-light">Together, we've enabled</p>
-            <div className="number-glow mb-6">
-              <span className="text-8xl md:text-9xl lg:text-[12rem] font-serif font-light number-highlight leading-none block">
-                {animatedCount.toLocaleString()}+
+            <p className="text-lg md:text-xl text-muted-foreground mb-2 font-light">Together, we've enabled</p>
+            <div className="number-glow mb-1 overflow-visible">
+              <span className="text-8xl md:text-9xl lg:text-[10rem] font-serif font-light number-highlight leading-tight block py-4">
+                {animatedCount.toLocaleString()}
               </span>
             </div>
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-light text-foreground mb-8 text-balance leading-tight">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-light text-foreground text-balance leading-tight">
               {campaignData.impactItem}s
             </h1>
           </div>
