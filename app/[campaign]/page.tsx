@@ -107,18 +107,18 @@ export default function CampaignPage({ params }: CampaignPageProps) {
                 className="w-full h-full object-contain"
               />
             </div>
-            <h1 className="text-4xl md:text-5xl font-serif font-light text-foreground mb-4">
+            <h1 className="text-3xl md:text-5xl font-serif font-light text-foreground mb-4">
               {campaignData.title}
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground  max-w-2xl mx-auto">
+            <p className="text-md md:text-xl text-muted-foreground  max-w-2xl mx-auto">
               {campaignData.description}
             </p>
             <div className="number-glow mb-1 overflow-visible">
-              <span className="text-8xl md:text-9xl lg:text-[10rem] font-serif font-light number-highlight leading-tight block py-4">
+              <span className="text-7xl md:text-9xl lg:text-[10rem] font-serif font-light number-highlight leading-tight block py-4">
                 {animatedCount.toLocaleString()}
               </span>
             </div>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-light text-foreground leading-tight">
+            <h2 className="text-2xl md:text-4xl lg:text-5xl font-serif font-light text-foreground leading-tight">
               <span className="keep-together underline-accent">{campaignData.impactItem}s</span>{' '}
               <span className="text-muted-foreground">{campaignData.impactPrompt.past.charAt(0).toUpperCase() + campaignData.impactPrompt.past.slice(1)}</span>
             </h2>
@@ -130,8 +130,8 @@ export default function CampaignPage({ params }: CampaignPageProps) {
         <Card className="max-w-lg mx-auto p-8 shadow-elegant border-2 bg-card/95 backdrop-blur-sm animate-scale-in">
           <div className="text-center mb-6">
             <HandHeart className="w-12 h-12 text-muted-foreground/90 mx-auto mb-4" />
-            <h2 className="text-3xl font-serif font-light text-foreground mb-2"><span className="text-muted-foreground">{campaignData.impactPrompt.present.charAt(0).toUpperCase() + campaignData.impactPrompt.present.slice(1)}</span> <span className="keep-together underline-accent">{campaignData.impactItem}s</span></h2>
-            <p className="text-muted-foreground">{campaignData.impactDescription}</p>
+            <h2 className="text-2xl font-serif font-light text-foreground mb-2"><span className="text-muted-foreground">{campaignData.impactPrompt.present.charAt(0).toUpperCase() + campaignData.impactPrompt.present.slice(1)}</span> <span className="keep-together underline-accent">{campaignData.impactItem}s</span></h2>
+            <p className="text-muted-foreground text-sm">{campaignData.impactDescription}</p>
           </div>
 
           <div className="space-y-4 mb-8">

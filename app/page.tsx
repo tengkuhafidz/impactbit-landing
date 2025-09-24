@@ -59,19 +59,19 @@ export default function HomePage() {
         <div className="animate-slide-up">
           <p className="text-lg md:text-xl text-muted-foreground mb-2 font-light">Together, we've created</p>
           <div className="number-glow mb-1 overflow-visible">
-            <span className="text-8xl md:text-9xl lg:text-[10rem] font-serif font-light number-highlight leading-tight block py-4">
+            <span className="text-7xl md:text-9xl lg:text-[10rem] font-serif font-light number-highlight leading-tight block py-4">
               {animatedImpact.toLocaleString()}
             </span>
           </div>
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-light text-foreground mb-6 text-balance leading-tight">
+          <h1 className="text-3xl md:text-6xl lg:text-7xl font-serif font-light text-foreground mb-6 text-balance leading-tight">
             Units of Impact
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto font-light">
+          <p className="text-lg md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto font-light">
             Join thousands making a difference through micro-donations. Every contribution creates lasting change in our community.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
-              onClick={() => window.scrollTo({ top: window.innerHeight, behavior: "smooth" })}
+              onClick={() => document.getElementById('campaigns-section')?.scrollIntoView({ behavior: 'smooth' })}
               className="h-14 px-8 text-lg bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-medium transition-all duration-200 hover:shadow-soft"
             >
               Explore Campaigns
@@ -138,7 +138,7 @@ export default function HomePage() {
       </section>
 
       {/* Campaigns Section */}
-      <section className="px-6 py-16 md:py-24 relative z-10">
+      <section id="campaigns-section" className="px-6 py-16 md:py-24 relative z-10">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-serif font-light text-foreground mb-4">Our Campaigns</h2>
@@ -235,15 +235,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Mobile CTA */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-card/95 backdrop-blur-sm border-t border-border lg:hidden z-20">
-        <Button
-          onClick={() => window.scrollTo({ top: window.innerHeight, behavior: "smooth" })}
-          className="w-full h-14 text-lg gradient-primary text-primary-foreground rounded-xl font-medium shadow-soft"
-        >
-          Explore Campaigns
-        </Button>
-      </div>
     </div>
   )
 }
