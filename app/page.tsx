@@ -80,7 +80,7 @@ export default function HomePage() {
             <Button
               onClick={() => document.getElementById('impact-stats')?.scrollIntoView({ behavior: 'smooth' })}
               variant="outline"
-              className="h-14 px-8 text-lg rounded-xl font-medium border-border hover:bg-secondary/50"
+              className="h-14 px-8 text-lg rounded-xl font-medium border-border hover:bg-secondary/50 hover:text-secondary-foreground"
             >
               See Our Impact
             </Button>
@@ -160,7 +160,7 @@ export default function HomePage() {
                       </Badge>
                     )}
                     <div className="mb-6">
-                      <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4 overflow-hidden">
+                      <div className="w-16 h-16 bg-white border rounded-2xl flex items-center justify-center mb-4 overflow-hidden">
                         <img src={campaign.iconPath} alt={campaign.title} className="w-12 h-12 object-contain" />
                       </div>
                       <CardTitle className="text-2xl font-serif font-light">{campaign.title}</CardTitle>
@@ -180,7 +180,7 @@ export default function HomePage() {
                         <p className="text-2xl font-serif font-light text-primary">
                           {campaign.totalImpactUnits.toLocaleString()}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-1">{campaign.impactItem}s enabled</p>
+                        <p className="text-xs text-muted-foreground mt-1">{campaign.impactItem}s {campaign.impactPrompt.past}</p>
                       </div>
                       <div className="text-center p-3 bg-accent/5 rounded-xl">
                         <p className="text-2xl font-serif font-light text-accent">${campaign.unitPrice}</p>
@@ -201,7 +201,7 @@ export default function HomePage() {
                       asChild
                     >
                       <Link href={`/${campaign.id}`}>
-                        Enable {campaign.impactItem}s
+                        {campaign.impactPrompt.present.charAt(0).toUpperCase() + campaign.impactPrompt.present.slice(1)} {campaign.impactItem}s
                         <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                       </Link>
                     </Button>

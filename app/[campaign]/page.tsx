@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { notFound } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { BookOpen, Globe, Users, Heart, Star, TrendingUp } from "lucide-react"
 import mockCampaigns from "@/content/mockCampaigns"
+import { HandHeart, Star, TrendingUp } from "lucide-react"
+import Image from "next/image"
+import { notFound } from "next/navigation"
+import { useEffect, useState } from "react"
 
 interface CampaignPageProps {
   params: {
@@ -23,7 +24,8 @@ export default function CampaignPage({ params }: CampaignPageProps) {
 
   const [customLessons, setCustomLessons] = useState("")
   const [animatedCount, setAnimatedCount] = useState(0)
-  const [showConfirmation, setShowConfirmation] = useState("")
+  const [selectedUnits, setSelectedUnits] = useState<number>(0)
+  const [selectedDescription, setSelectedDescription] = useState<string>("")
 
   // Counter animation effect
   useEffect(() => {
@@ -39,13 +41,25 @@ export default function CampaignPage({ params }: CampaignPageProps) {
     return () => clearInterval(timer)
   }, [campaignData.totalImpactUnits])
 
-  const handleDonation = (units: number, description: string) => {
-    const itemLabel = units === 1 ? campaignData.impactItem.toLowerCase() : `${campaignData.impactItem.toLowerCase()}s`
-    setShowConfirmation(`${campaignData.impactPromptAlt} ${units} ${itemLabel}${description ? `${description}` : ''} 🎉`)
-    setTimeout(() => setShowConfirmation(""), 3000)
+  const handlePresetDonation = (units: number, description: string) => {
+    setSelectedUnits(units)
+    setSelectedDescription(description)
+    setCustomLessons("") // Clear custom input when preset is selected
   }
 
-  const customPrice = customLessons ? Number.parseInt(customLessons) * campaignData.unitPrice : 0
+  const handleCustomInputChange = (value: string) => {
+    setCustomLessons(value)
+    if (value && Number.parseInt(value) > 0) {
+      setSelectedUnits(Number.parseInt(value))
+      setSelectedDescription("")
+    } else if (!value) {
+      setSelectedUnits(0)
+      setSelectedDescription("")
+    }
+  }
+
+  const activeUnits = customLessons && Number.parseInt(customLessons) > 0 ? Number.parseInt(customLessons) : selectedUnits
+  const activePrice = activeUnits * campaignData.unitPrice
 
   // Mock data for community activity
   const leaderboard = [
@@ -57,11 +71,11 @@ export default function CampaignPage({ params }: CampaignPageProps) {
   ]
 
   const recentActivity = [
-    `Aisha enabled 7 ${campaignData.impactItem.toLowerCase()}s (1 week)`,
-    `Zayd enabled 30 ${campaignData.impactItem.toLowerCase()}s (1 month)`,
-    `Anonymous just enabled 15 ${campaignData.impactItem.toLowerCase()}s`,
-    `Maryam enabled 7 ${campaignData.impactItem.toLowerCase()}s (1 week)`,
-    `Hassan enabled 60 ${campaignData.impactItem.toLowerCase()}s (2 months)`,
+    `Aisha ${campaignData.impactPrompt.past} 7 ${campaignData.impactItem.toLowerCase()}s`,
+    `Zayd ${campaignData.impactPrompt.past} 30 ${campaignData.impactItem.toLowerCase()}s`,
+    `Anonymous just ${campaignData.impactPrompt.past} 15 ${campaignData.impactItem.toLowerCase()}s`,
+    `Maryam ${campaignData.impactPrompt.past} 7 ${campaignData.impactItem.toLowerCase()}s`,
+    `Hassan ${campaignData.impactPrompt.past} 60 ${campaignData.impactItem.toLowerCase()}s`,
   ]
 
   return (
@@ -85,78 +99,93 @@ export default function CampaignPage({ params }: CampaignPageProps) {
         ></div>
       </div>
 
-      <section className="px-6 py-16 md:py-20 text-center max-w-6xl mx-auto relative z-10">
+      <section className="px-6 py-12 text-center max-w-6xl mx-auto relative z-10">
         <div className="animate-slide-up">
-          <div className="mb-12">
-            <p className="text-lg md:text-xl text-muted-foreground mb-2 font-light">Together, we've enabled</p>
+          <div className="mb-20 md:mb-24">
+            <div className="w-24 h-24 mx-auto mb-2 relative">
+              <Image
+                src={campaignData.iconPath}
+                alt={campaignData.title}
+                width={96}
+                height={96}
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <h1 className="text-4xl md:text-5xl font-serif font-light text-foreground mb-4">
+              {campaignData.title}
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground  max-w-2xl mx-auto">
+              {campaignData.description}
+            </p>
             <div className="number-glow mb-1 overflow-visible">
               <span className="text-8xl md:text-9xl lg:text-[10rem] font-serif font-light number-highlight leading-tight block py-4">
                 {animatedCount.toLocaleString()}
               </span>
             </div>
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-light text-foreground text-balance leading-tight">
-              {campaignData.impactItem}s
-            </h1>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-light text-foreground leading-tight">
+              <span className="keep-together underline-accent">{campaignData.impactItem}s</span>{' '}
+              <span className="text-muted-foreground">{campaignData.impactPrompt.past.charAt(0).toUpperCase() + campaignData.impactPrompt.past.slice(1)}</span>
+            </h2>
           </div>
         </div>
       </section>
 
-      <section className="px-6 pb-24 -mt-16 relative z-10">
-        <Card className="max-w-lg mx-auto p-8 shadow-elegant border-0 bg-card/95 backdrop-blur-sm animate-scale-in">
-          <div className="text-center mb-8">
-            <Heart className="w-8 h-8 mx-auto text-accent mb-4" />
-            <h2 className="text-3xl font-serif font-light text-foreground mb-2">Enable {campaignData.impactItem}s</h2>
-            <p className="text-muted-foreground mb-4">{campaignData.description}</p>
-            <p className="text-muted-foreground">Choose your impact</p>
+      <section className="px-6 -mt-16 relative z-10">
+        <Card className="max-w-lg mx-auto p-8 shadow-elegant border-2 bg-card/95 backdrop-blur-sm animate-scale-in">
+          <div className="text-center mb-6">
+            <HandHeart className="w-12 h-12 text-muted-foreground/90 mx-auto mb-4" />
+            <h2 className="text-3xl font-serif font-light text-foreground mb-2"><span className="text-muted-foreground">{campaignData.impactPrompt.present.charAt(0).toUpperCase() + campaignData.impactPrompt.present.slice(1)}</span> <span className="keep-together underline-accent">{campaignData.impactItem}s</span></h2>
+            <p className="text-muted-foreground">{campaignData.impactDescription}</p>
           </div>
 
           <div className="space-y-4 mb-8">
+            <p className="text-muted-foreground text-center">Choose your monthly impact</p>
             {campaignData.impactOptions.map((option, index) => {
               const isHighlight = index === campaignData.impactOptions.length - 1
               return (
                 <Button
                   key={index}
-                  onClick={() => handleDonation(option.units, option.description ? ` (${option.description})` : "")}
-                  className={`w-full h-14 text-lg ${isHighlight ? "gradient-accent text-accent-foreground" : "bg-primary hover:bg-primary/90 text-primary-foreground"} rounded-xl font-medium transition-all duration-200 hover:shadow-soft`}
+                  onClick={() => handlePresetDonation(option.units, option.description ? ` (${option.description})` : "")}
+                  className={`w-full min-h-[3.5rem] h-auto py-3 px-4 text-base sm:text-lg ${isHighlight ? "gradient-accent text-accent-foreground" : "bg-primary hover:bg-primary/90 text-primary-foreground"} rounded-xl font-medium transition-all duration-200 hover:shadow-soft`}
                 >
-                  {option.label} → ${(option.units * campaignData.unitPrice).toLocaleString()}
+                  <span className="flex items-center justify-between w-full gap-2 flex-wrap sm:flex-nowrap">
+                    <span className="text-left break-words">{option.label}</span>
+                    <span className="whitespace-nowrap font-semibold">${(option.units * campaignData.unitPrice).toLocaleString()}/mo</span>
+                  </span>
                 </Button>
               )
             })}
           </div>
 
-          <div className="space-y-4">
-            <Input
-              type="number"
-              placeholder={`Enter number of ${campaignData.impactItem.toLowerCase()}s`}
-              value={customLessons}
-              onChange={(e) => setCustomLessons(e.target.value)}
-              className="h-14 text-lg rounded-xl border-border bg-background"
-            />
-            {customLessons && Number.parseInt(customLessons) > 0 && (
-              <div className="p-4 bg-secondary/50 rounded-xl space-y-2">
-                <p className="text-foreground font-medium">
-                  You are enabling {Number.parseInt(customLessons)} {Number.parseInt(customLessons) === 1 ? campaignData.impactItem.toLowerCase() : `${campaignData.impactItem.toLowerCase()}s`} every month
-                </p>
-                <p className="text-2xl font-semibold text-foreground">
-                  ${customPrice} monthly
-                </p>
-              </div>
-            )}
-            <Button
-              onClick={() => handleDonation(Number.parseInt(customLessons) || 0, "")}
-              disabled={!customLessons || Number.parseInt(customLessons) <= 0}
-              className="w-full h-14 text-lg bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-medium transition-all duration-200 hover:shadow-soft disabled:opacity-50"
-            >
-              Commit to Monthly Impact
-            </Button>
-          </div>
-
-          {showConfirmation && (
-            <div className="mt-6 p-4 bg-accent/10 border border-accent/20 rounded-xl animate-fade-in">
-              <p className="text-accent text-center font-medium">{showConfirmation}</p>
+          {activeUnits > 0 && (
+            <div className="mt-6 p-4 bg-secondary/50 rounded-xl space-y-2 animate-fade-in">
+              <p className="text-foreground font-medium">
+                You are {campaignData.impactPrompt.continuous} {activeUnits} {activeUnits === 1 ? campaignData.impactItem.toLowerCase() : `${campaignData.impactItem.toLowerCase()}s`} every month{selectedDescription}
+              </p>
+              <p className="text-2xl font-semibold text-foreground">
+                ${activePrice.toLocaleString()} monthly
+              </p>
             </div>
           )}
+
+          <div className="mt-6 pt-6 border-t border-border">
+            <p className="text-muted-foreground text-center mb-3">Or enter a custom amount</p>
+            <div className="space-y-3">
+              <Input
+                type="number"
+                placeholder={`Enter number of ${campaignData.impactItem.toLowerCase()}s`}
+                value={customLessons}
+                onChange={(e) => handleCustomInputChange(e.target.value)}
+                className="h-14 text-lg rounded-xl border-border bg-background"
+              />
+              <Button
+                disabled={activeUnits === 0}
+                className="w-full h-14 text-lg bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-medium transition-all duration-200 hover:shadow-soft disabled:opacity-50"
+              >
+                Commit to Monthly Impact
+              </Button>
+            </div>
+          </div>
         </Card>
       </section>
 
@@ -167,13 +196,34 @@ export default function CampaignPage({ params }: CampaignPageProps) {
             <p className="text-xl text-muted-foreground">See how our community is making a difference</p>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* Recent Activity */}
+            <Card className="p-8 shadow-soft border-0 bg-card">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-primary" />
+                </div>
+                <h3 className="text-2xl font-serif font-light text-foreground">Recent Enablers</h3>
+              </div>
+              <div className="space-y-4">
+                {recentActivity.map((activity, index) => (
+                  <div
+                    key={index}
+                    className="p-4 bg-primary/5 border-l-4 border-primary rounded-r-xl animate-fade-in transition-all duration-200 hover:bg-primary/10"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                  >
+                    <p className="text-foreground font-medium">{activity}</p>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
             {/* Leaderboard */}
             <Card className="p-8 shadow-soft border-0 bg-card">
               <div className="flex items-center gap-3 mb-8">
                 <div className="w-10 h-10 bg-accent/10 rounded-xl flex items-center justify-center">
                   <Star className="w-5 h-5 text-accent" />
                 </div>
-                <h3 className="text-2xl font-serif font-light text-foreground">Top Enablers</h3>
+                <h3 className="text-2xl font-serif font-light text-foreground">Top {campaignData.impactPrompt.present.charAt(0).toUpperCase() + campaignData.impactPrompt.present.slice(1)}rs</h3>
               </div>
               <div className="space-y-4">
                 {leaderboard.map((enabler, index) => (
@@ -196,26 +246,6 @@ export default function CampaignPage({ params }: CampaignPageProps) {
               </div>
             </Card>
 
-            {/* Recent Activity */}
-            <Card className="p-8 shadow-soft border-0 bg-card">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-                  <TrendingUp className="w-5 h-5 text-primary" />
-                </div>
-                <h3 className="text-2xl font-serif font-light text-foreground">Recent Activity</h3>
-              </div>
-              <div className="space-y-4">
-                {recentActivity.map((activity, index) => (
-                  <div
-                    key={index}
-                    className="p-4 bg-primary/5 border-l-4 border-primary rounded-r-xl animate-fade-in transition-all duration-200 hover:bg-primary/10"
-                    style={{ animationDelay: `${index * 0.1}s` }}
-                  >
-                    <p className="text-foreground font-medium">{activity}</p>
-                  </div>
-                ))}
-              </div>
-            </Card>
           </div>
         </div>
       </section>
@@ -226,13 +256,13 @@ export default function CampaignPage({ params }: CampaignPageProps) {
             Be part of this mission.
           </h2>
           <p className="text-xl text-primary-foreground/80 mb-12 max-w-2xl mx-auto">
-            Enable {campaignData.impactItem.toLowerCase()}s today and join thousands making knowledge accessible worldwide.
+            {campaignData.impactPrompt.present.charAt(0).toUpperCase() + campaignData.impactPrompt.present.slice(1)} {campaignData.impactItem.toLowerCase()}s today and join thousands making knowledge accessible worldwide.
           </p>
           <Button
             onClick={() => window.scrollTo({ top: 600, behavior: "smooth" })}
             className="h-14 px-12 text-lg bg-primary-foreground text-primary hover:bg-primary-foreground/90 rounded-xl font-medium shadow-soft transition-all duration-200 hover:shadow-elegant"
           >
-            Enable {campaignData.impactItem}s
+            {campaignData.impactPrompt.present.charAt(0).toUpperCase() + campaignData.impactPrompt.present.slice(1)} {campaignData.impactItem}s
           </Button>
         </div>
       </section>

@@ -7,9 +7,9 @@ import { Suspense } from "react"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "QuranBit - Enable Quran Lessons Worldwide",
+  title: "ImpactBit - Creating Impact Together",
   description:
-    "Together, we've enabled 10,000+ Quran lessons. Every $4 enables 1 Quran lesson per month for someone seeking sacred knowledge.",
+    "Join thousands making a difference through micro-donations. Every contribution creates lasting change in our community.",
   generator: "v0.app",
 }
 
