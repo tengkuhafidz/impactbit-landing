@@ -25,7 +25,6 @@ export default function CampaignPage({ params }: CampaignPageProps) {
   const [customLessons, setCustomLessons] = useState("")
   const [animatedCount, setAnimatedCount] = useState(0)
   const [selectedUnits, setSelectedUnits] = useState<number>(0)
-  const [selectedDescription, setSelectedDescription] = useState<string>("")
 
   // Counter animation effect
   useEffect(() => {
@@ -41,9 +40,8 @@ export default function CampaignPage({ params }: CampaignPageProps) {
     return () => clearInterval(timer)
   }, [campaignData.totalImpactUnits])
 
-  const handlePresetDonation = (units: number, description: string) => {
+  const handlePresetDonation = (units: number) => {
     setSelectedUnits(units)
-    setSelectedDescription(description)
     setCustomLessons("") // Clear custom input when preset is selected
   }
 
@@ -51,10 +49,8 @@ export default function CampaignPage({ params }: CampaignPageProps) {
     setCustomLessons(value)
     if (value && Number.parseInt(value) > 0) {
       setSelectedUnits(Number.parseInt(value))
-      setSelectedDescription("")
     } else if (!value) {
       setSelectedUnits(0)
-      setSelectedDescription("")
     }
   }
 
@@ -63,11 +59,11 @@ export default function CampaignPage({ params }: CampaignPageProps) {
 
   // Mock data for community activity
   const leaderboard = [
-    { name: "Ahmad", lessons: 365, amount: 1460 },
-    { name: "Fatima", lessons: 180, amount: 720 },
-    { name: "Omar", lessons: 120, amount: 480 },
-    { name: "Aisha", lessons: 90, amount: 360 },
-    { name: "Yusuf", lessons: 60, amount: 240 },
+    { name: "Ahmad", lessons: 365 },
+    { name: "Fatima", lessons: 180 },
+    { name: "Omar", lessons: 120 },
+    { name: "Aisha", lessons: 90 },
+    { name: "Yusuf", lessons: 60 },
   ]
 
   const recentActivity = [
@@ -145,7 +141,7 @@ export default function CampaignPage({ params }: CampaignPageProps) {
               return (
                 <Button
                   key={index}
-                  onClick={() => handlePresetDonation(option.units, option.description ? ` (${option.description})` : "")}
+                  onClick={() => handlePresetDonation(option.units)}
                   className={`w-full min-h-[3.5rem] h-auto py-3 px-4 text-base sm:text-lg ${isHighlight ? "gradient-accent text-accent-foreground" : "bg-primary hover:bg-primary/90 text-primary-foreground"} rounded-xl font-medium transition-all duration-200 hover:shadow-soft`}
                 >
                   <span className="flex items-center justify-between w-full gap-2 flex-wrap sm:flex-nowrap">
@@ -231,17 +227,14 @@ export default function CampaignPage({ params }: CampaignPageProps) {
                 {leaderboard.map((enabler, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-4 bg-secondary/50 rounded-xl transition-all duration-200 hover:bg-secondary/70"
+                    className="flex items-center gap-4 p-4 bg-secondary/50 rounded-xl transition-all duration-200 hover:bg-secondary/70"
                   >
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 gradient-primary text-primary-foreground rounded-xl flex items-center justify-center font-semibold">
-                        {index + 1}
-                      </div>
-                      <span className="font-medium text-foreground text-lg">{enabler.name}</span>
+                    <div className="w-10 h-10 gradient-primary text-primary-foreground rounded-xl flex items-center justify-center font-semibold shrink-0">
+                      {index + 1}
                     </div>
-                    <div className="text-right">
-                      <div className="font-semibold text-foreground text-lg">{enabler.lessons} {campaignData.impactItem.toLowerCase()}s</div>
-                      <div className="text-muted-foreground">${enabler.amount}</div>
+                    <div className="flex-1 text-left">
+                      <div className="font-medium text-foreground text-lg">{enabler.name}</div>
+                      <div className="text-muted-foreground mt-1">{enabler.lessons} {campaignData.impactItem.toLowerCase()}s</div>
                     </div>
                   </div>
                 ))}
