@@ -173,7 +173,7 @@ export default function CampaignPage({ params }: CampaignPageProps) {
               {activeUnits > 0 && (
                 <div className="p-4 bg-secondary/50 rounded-xl space-y-2 animate-fade-in">
                   <p className="text-foreground font-medium">
-                    You are {campaignData.impactPrompt.continuous} {activeUnits} {activeUnits === 1 ? campaignData.impactItem.toLowerCase() : `${campaignData.impactItem.toLowerCase()}s`} every month{selectedDescription}
+                    You are {campaignData.impactPrompt.continuous} {activeUnits} {activeUnits === 1 ? campaignData.impactItem.toLowerCase() : `${campaignData.impactItem.toLowerCase()}s`} every month
                   </p>
                   <p className="text-2xl font-semibold text-foreground">
                     ${activePrice.toLocaleString()} monthly
