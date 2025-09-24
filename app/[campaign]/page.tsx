@@ -155,20 +155,6 @@ export default function CampaignPage({ params }: CampaignPageProps) {
                 </Button>
               )
             })}
-          </div>
-
-          {activeUnits > 0 && (
-            <div className="mt-6 p-4 bg-secondary/50 rounded-xl space-y-2 animate-fade-in">
-              <p className="text-foreground font-medium">
-                You are {campaignData.impactPrompt.continuous} {activeUnits} {activeUnits === 1 ? campaignData.impactItem.toLowerCase() : `${campaignData.impactItem.toLowerCase()}s`} every month{selectedDescription}
-              </p>
-              <p className="text-2xl font-semibold text-foreground">
-                ${activePrice.toLocaleString()} monthly
-              </p>
-            </div>
-          )}
-
-          <div className="mt-6 pt-6 border-t border-border">
             <p className="text-muted-foreground text-center mb-3">Or enter a custom amount</p>
             <div className="space-y-3">
               <Input
@@ -178,11 +164,27 @@ export default function CampaignPage({ params }: CampaignPageProps) {
                 onChange={(e) => handleCustomInputChange(e.target.value)}
                 className="h-14 text-lg rounded-xl border-border bg-background"
               />
+            </div>
+          </div>
+
+          <div className="pt-6 border-t border-border">
+
+            <div>
+              {activeUnits > 0 && (
+                <div className="p-4 bg-secondary/50 rounded-xl space-y-2 animate-fade-in">
+                  <p className="text-foreground font-medium">
+                    You are {campaignData.impactPrompt.continuous} {activeUnits} {activeUnits === 1 ? campaignData.impactItem.toLowerCase() : `${campaignData.impactItem.toLowerCase()}s`} every month{selectedDescription}
+                  </p>
+                  <p className="text-2xl font-semibold text-foreground">
+                    ${activePrice.toLocaleString()} monthly
+                  </p>
+                </div>
+              )}
               <Button
                 disabled={activeUnits === 0}
-                className="w-full h-14 text-lg bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-medium transition-all duration-200 hover:shadow-soft disabled:opacity-50"
+                className="w-full h-14 text-lg bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-medium transition-all duration-200 hover:shadow-soft disabled:opacity-50 mt-6"
               >
-                Commit to Monthly Impact
+                Start Monthly Impact
               </Button>
             </div>
           </div>
@@ -267,14 +269,6 @@ export default function CampaignPage({ params }: CampaignPageProps) {
         </div>
       </section>
 
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-card/95 backdrop-blur-sm border-t border-border lg:hidden z-20">
-        <Button
-          onClick={() => window.scrollTo({ top: 600, behavior: "smooth" })}
-          className="w-full h-14 text-lg gradient-primary text-primary-foreground rounded-xl font-medium shadow-soft"
-        >
-          Enable {campaignData.impactItem}s
-        </Button>
-      </div>
-    </div>
+    </div >
   )
 }
