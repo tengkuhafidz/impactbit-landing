@@ -47,7 +47,7 @@ const quranbit: MockCampaign = {
     impactPromptAlt: "📖 Enabled",
     isFullySponsored: false,
     isFeatured: true,
-    totalImpactUnits: 194964,
+    totalImpactUnits: 194964, // not to include in Sanity
     impactOptions: [
         {
             label: "1 lesson",
