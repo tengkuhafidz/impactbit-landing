@@ -150,7 +150,7 @@ export default function HomePage() {
               return (
                 <Card
                   key={campaign.id}
-                  className="overflow-hidden border-0 shadow-soft bg-card hover:shadow-elegant transition-all duration-300 animate-scale-in"
+                  className="overflow-hidden border-0 shadow-soft bg-card hover:shadow-elegant transition-all duration-300 animate-scale-in flex flex-col"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <CardHeader className="relative p-8">
@@ -170,7 +170,7 @@ export default function HomePage() {
                     </CardDescription>
                   </CardHeader>
 
-                  <CardContent className="px-8 pb-6">
+                  <CardContent className="px-8 pb-6 flex-1">
                     <div className="p-4 bg-secondary/50 rounded-xl mb-6">
                       <p className="text-sm text-foreground/80">{campaign.impactDescription}</p>
                     </div>
