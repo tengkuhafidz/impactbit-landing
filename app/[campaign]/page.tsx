@@ -3,7 +3,8 @@
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import mockCampaigns from "@/content/mockCampaigns"
+import { getCampaign } from "@/lib/sanity/queries"
+import type { Campaign } from "@/lib/sanity/types"
 import { HandHeart, Star, TrendingUp } from "lucide-react"
 import Image from "next/image"
 import { notFound } from "next/navigation"
@@ -16,18 +17,32 @@ interface CampaignPageProps {
 }
 
 export default function CampaignPage({ params }: CampaignPageProps) {
-  const campaignData = mockCampaigns[params.campaign]
-
-  if (!campaignData) {
-    notFound()
-  }
-
+  const [campaignData, setCampaignData] = useState<Campaign | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const [customLessons, setCustomLessons] = useState("")
   const [animatedCount, setAnimatedCount] = useState(0)
   const [selectedUnits, setSelectedUnits] = useState<number>(0)
 
+  // Fetch campaign data from Sanity
+  useEffect(() => {
+    async function fetchCampaign() {
+      setIsLoading(true)
+      try {
+        const data = await getCampaign(params.campaign)
+        setCampaignData(data)
+      } catch (error) {
+        console.error("Error fetching campaign:", error)
+        setCampaignData(null)
+      }
+      setIsLoading(false)
+    }
+    fetchCampaign()
+  }, [params.campaign])
+
   // Counter animation effect
   useEffect(() => {
+    if (!campaignData) return
+
     const timer = setInterval(() => {
       setAnimatedCount((prev) => {
         if (prev < campaignData.totalImpactUnits) {
@@ -38,7 +53,22 @@ export default function CampaignPage({ params }: CampaignPageProps) {
     }, 50)
 
     return () => clearInterval(timer)
-  }, [campaignData.totalImpactUnits])
+  }, [campaignData])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-refreshing bg-pattern-dots flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading campaign...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!campaignData) {
+    notFound()
+  }
 
   const handlePresetDonation = (units: number) => {
     setSelectedUnits(units)
