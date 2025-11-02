@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { getAllCampaigns } from "@/lib/sanity/queries"
+import { getOverallStatsFromFirestore } from "@/lib/firebase/firestore"
 import type { Campaign } from "@/lib/sanity/types"
 import Link from "next/link"
 import Image from "next/image"
@@ -14,6 +15,8 @@ export default function HomePage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [animatedImpact, setAnimatedImpact] = useState(0)
+  const [impactCreators, setImpactCreators] = useState(0)
+  const [impactAdvocates, setImpactAdvocates] = useState(0)
 
   // Fetch campaigns from Sanity
   useEffect(() => {
@@ -29,6 +32,24 @@ export default function HomePage() {
       setIsLoading(false)
     }
     fetchCampaigns()
+  }, [])
+
+  // Fetch overall stats (impact creators & advocates) from Firestore - single efficient query
+  useEffect(() => {
+    async function fetchOverallStats() {
+      try {
+        const stats = await getOverallStatsFromFirestore()
+        // Use fallback values if Firestore returns 0 (error or no data)
+        setImpactCreators(stats.totalDonors > 0 ? stats.totalDonors : 2891)
+        setImpactAdvocates(stats.totalAdvocates && stats.totalAdvocates > 0 ? stats.totalAdvocates : 342)
+      } catch (error) {
+        console.error("Error fetching overall stats:", error)
+        // Fallback to default values on error
+        setImpactCreators(2891)
+        setImpactAdvocates(342)
+      }
+    }
+    fetchOverallStats()
   }, [])
 
   // Calculate overall impact
@@ -139,7 +160,9 @@ export default function HomePage() {
                 <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center mb-4">
                   <Users className="w-6 h-6 text-accent" />
                 </div>
-                <div className="text-3xl font-serif font-light text-foreground mb-1">2,891</div>
+                <div className="text-3xl font-serif font-light text-foreground mb-1">
+                  {impactCreators > 0 ? impactCreators.toLocaleString() : '...'}
+                </div>
                 <p className="text-sm text-muted-foreground">Impact Creators</p>
               </CardContent>
             </Card>
@@ -149,7 +172,9 @@ export default function HomePage() {
                 <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center mb-4">
                   <Share2 className="w-6 h-6 text-accent" />
                 </div>
-                <div className="text-3xl font-serif font-light text-foreground mb-1">342</div>
+                <div className="text-3xl font-serif font-light text-foreground mb-1">
+                  {impactAdvocates > 0 ? impactAdvocates.toLocaleString() : '...'}
+                </div>
                 <p className="text-sm text-muted-foreground">Impact Advocates</p>
               </CardContent>
             </Card>

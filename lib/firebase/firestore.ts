@@ -6,6 +6,7 @@ export interface FirestoreCampaignStats {
   totalDonation: number
   totalDonors: number
   totalUnitImpact: number
+  totalAdvocates?: number
 }
 
 export interface FirestoreSubscription {
@@ -21,6 +22,7 @@ export interface FirestoreSubscription {
   organisationId: string
   phone: string
   quantity: number
+  referrals?: number
   stripeCustomerId: string
   stripeSubscriptionId: string
   unitImpact: number
@@ -45,13 +47,11 @@ export async function getCampaignStatsFromFirestore(
   campaignId: string
 ): Promise<FirestoreCampaignStats> {
   try {
-    console.log(`[Firestore] Fetching stats for campaign: ${campaignId}`)
     const campaignStatsRef = doc(db, "campaignStats", campaignId)
     const campaignStatsSnap = await getDoc(campaignStatsRef)
 
     if (campaignStatsSnap.exists()) {
       const data = campaignStatsSnap.data()
-      console.log(`[Firestore] Document found for ${campaignId}:`, data)
       return {
         lastUpdated: data.lastUpdated?.toDate() || new Date(),
         totalDonation: data.totalDonation || 0,
@@ -59,8 +59,6 @@ export async function getCampaignStatsFromFirestore(
         totalUnitImpact: data.totalUnitImpact || 0,
       }
     } else {
-      console.warn(`[Firestore] Campaign stats not found for: ${campaignId}`)
-      console.warn(`[Firestore] Make sure the document exists at: campaignStats/${campaignId}`)
       return {
         lastUpdated: new Date(),
         totalDonation: 0,
@@ -69,7 +67,6 @@ export async function getCampaignStatsFromFirestore(
       }
     }
   } catch (error) {
-    console.error(`[Firestore] Error fetching campaign stats for ${campaignId}:`, error)
     return {
       lastUpdated: new Date(),
       totalDonation: 0,
@@ -90,9 +87,6 @@ export async function getRecentEnablersFromFirestore(
   limitCount: number = 5
 ): Promise<Enabler[]> {
   try {
-    console.log(`[Firestore] Fetching recent enablers${campaignId ? ` for campaign: ${campaignId}` : ''}`)
-    console.log(`[Firestore] Limit: ${limitCount}`)
-
     const subscriptionsRef = collection(db, "subscriptions")
 
     // Build query with optional campaign filter
@@ -104,7 +98,6 @@ export async function getRecentEnablersFromFirestore(
 
     // Add campaign filter if provided
     if (campaignId) {
-      console.log(`[Firestore] Adding campaignId filter: ${campaignId}`)
       q = query(
         subscriptionsRef,
         where("campaignId", "==", campaignId),
@@ -113,21 +106,11 @@ export async function getRecentEnablersFromFirestore(
       )
     }
 
-    console.log(`[Firestore] Executing query...`)
     const querySnapshot = await getDocs(q)
-    console.log(`[Firestore] Query returned ${querySnapshot.size} documents`)
 
     const enablers: Enabler[] = []
     querySnapshot.forEach((doc) => {
       const data = doc.data()
-      console.log(`[Firestore] Processing document ${doc.id}:`, {
-        name: data.name,
-        campaignId: data.campaignId,
-        unitPrice: data.unitPrice,
-        quantity: data.quantity,
-        isActive: data.isActive,
-        updatedAt: data.updatedAt
-      })
       enablers.push({
         name: data.name || "Anonymous",
         amount: (data.unitPrice || 0) * (data.quantity || 1),
@@ -137,15 +120,47 @@ export async function getRecentEnablersFromFirestore(
       })
     })
 
-    console.log(`[Firestore] Successfully processed ${enablers.length} enablers`)
     return enablers
   } catch (error) {
-    console.error(`[Firestore] Error fetching recent enablers:`, error)
-    if (error instanceof Error) {
-      console.error(`[Firestore] Error name: ${error.name}`)
-      console.error(`[Firestore] Error message: ${error.message}`)
-      console.error(`[Firestore] Error stack:`, error.stack)
-    }
     return []
+  }
+}
+
+/**
+ * Fetch overall statistics from Firestore (efficient - single document read)
+ * Reads from campaignStats/overall which contains pre-aggregated stats
+ * @returns Overall stats including total donors (impact creators) and advocates
+ */
+export async function getOverallStatsFromFirestore(): Promise<FirestoreCampaignStats> {
+  try {
+    const overallStatsRef = doc(db, "campaignStats", "overall")
+    const overallStatsSnap = await getDoc(overallStatsRef)
+
+    if (overallStatsSnap.exists()) {
+      const data = overallStatsSnap.data()
+      return {
+        lastUpdated: data.lastUpdated?.toDate() || new Date(),
+        totalDonation: data.totalDonation || 0,
+        totalDonors: data.totalDonors || 0,
+        totalUnitImpact: data.totalUnitImpact || 0,
+        totalAdvocates: data.totalAdvocates || 0,
+      }
+    } else {
+      return {
+        lastUpdated: new Date(),
+        totalDonation: 0,
+        totalDonors: 0,
+        totalUnitImpact: 0,
+        totalAdvocates: 0,
+      }
+    }
+  } catch (error) {
+    return {
+      lastUpdated: new Date(),
+      totalDonation: 0,
+      totalDonors: 0,
+      totalUnitImpact: 0,
+      totalAdvocates: 0,
+    }
   }
 }
