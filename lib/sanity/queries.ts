@@ -9,6 +9,7 @@ import type { Campaign, SanityCampaignRaw } from "./types"
 const CAMPAIGN_QUERY = `*[_type == "campaign" && id.current == $id][0]{
   _id,
   "id": id.current,
+  index,
   title,
   description,
   impactDescription,
@@ -38,9 +39,10 @@ const CAMPAIGN_QUERY = `*[_type == "campaign" && id.current == $id][0]{
 /**
  * GROQ query to fetch all campaigns with populated organisations
  */
-const ALL_CAMPAIGNS_QUERY = `*[_type == "campaign"]{
+const ALL_CAMPAIGNS_QUERY = `*[_type == "campaign"] | order(index asc) {
   _id,
   "id": id.current,
+  index,
   title,
   description,
   impactDescription,
@@ -81,6 +83,7 @@ function transformCampaign(rawCampaign: SanityCampaignRaw): Campaign {
 
   return {
     id: rawCampaign.id,
+    index: rawCampaign.index,
     title: rawCampaign.title,
     description: rawCampaign.description,
     impactDescription: rawCampaign.impactDescription,

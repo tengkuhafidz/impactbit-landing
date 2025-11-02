@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import mockCampaigns from "@/content/mockCampaigns"
+import { getAllCampaigns } from "@/lib/sanity/queries"
+import type { Campaign } from "@/lib/sanity/types"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -10,8 +11,25 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowRight, Heart, Users, TrendingUp, Star, DollarSign, Speaker, SpeakerIcon, Share, RefreshCcw, Share2 } from "lucide-react"
 
 export default function HomePage() {
-  const campaigns = Object.values(mockCampaigns)
+  const [campaigns, setCampaigns] = useState<Campaign[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [animatedImpact, setAnimatedImpact] = useState(0)
+
+  // Fetch campaigns from Sanity
+  useEffect(() => {
+    async function fetchCampaigns() {
+      setIsLoading(true)
+      try {
+        const data = await getAllCampaigns()
+        setCampaigns(data)
+      } catch (error) {
+        console.error("Error fetching campaigns:", error)
+        setCampaigns([])
+      }
+      setIsLoading(false)
+    }
+    fetchCampaigns()
+  }, [])
 
   // Calculate overall impact
   const totalImpact = campaigns.reduce((sum, campaign) => sum + campaign.totalImpactUnits, 0)
@@ -20,6 +38,8 @@ export default function HomePage() {
 
   // Counter animation effect
   useEffect(() => {
+    if (isLoading || totalImpact === 0) return
+
     const timer = setInterval(() => {
       setAnimatedImpact((prev) => {
         if (prev < totalImpact) {
@@ -30,7 +50,18 @@ export default function HomePage() {
     }, 30)
 
     return () => clearInterval(timer)
-  }, [totalImpact])
+  }, [totalImpact, isLoading])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background bg-pattern-dots flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading campaigns...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background bg-pattern-dots relative overflow-hidden">
@@ -161,7 +192,7 @@ export default function HomePage() {
                     )}
                     <div className="mb-6">
                       <div className="w-16 h-16 bg-white border rounded-2xl flex items-center justify-center mb-4 overflow-hidden">
-                        <img src={campaign.iconPath} alt={campaign.title} className="w-12 h-12 object-contain" />
+                        <Image src={campaign.iconPath} alt={campaign.title} width={48} height={48} className="w-12 h-12 object-contain" />
                       </div>
                       <CardTitle className="text-2xl font-serif font-light">{campaign.title}</CardTitle>
                     </div>

@@ -12,6 +12,7 @@ export interface SanityImpactPrompt {
   present: string
   continuous: string
   past: string
+  noun: string
 }
 
 export interface SanityOrganisation {
@@ -29,6 +30,7 @@ export interface SanityOrganisation {
 export interface SanityCampaignRaw {
   _id: string
   id: string
+  index: number
   title: string
   description: string
   impactDescription: string
@@ -49,6 +51,7 @@ export interface SanityCampaignRaw {
 // Processed campaign data (ready to use in components)
 export interface Campaign {
   id: string
+  index: number
   title: string
   description: string
   impactDescription: string
