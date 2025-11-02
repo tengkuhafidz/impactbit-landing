@@ -17,6 +17,13 @@ export default defineType({
       validation: Rule => Rule.required()
     }),
     defineField({
+      name: 'index',
+      title: 'Display Order',
+      type: 'number',
+      description: 'Order in which campaigns appear (lower numbers first)',
+      validation: Rule => Rule.required().min(0).integer()
+    }),
+    defineField({
       name: 'title',
       title: 'Title',
       type: 'string',
@@ -64,6 +71,13 @@ export default defineType({
           name: 'past',
           title: 'Past Tense',
           type: 'string',
+          validation: Rule => Rule.required()
+        }),
+        defineField({
+          name: 'noun',
+          title: 'Noun',
+          type: 'string',
+          description: 'Noun form (e.g., "enabler", "contributor")',
           validation: Rule => Rule.required()
         })
       ],
