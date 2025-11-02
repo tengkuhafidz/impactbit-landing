@@ -5,7 +5,8 @@ import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { getCampaign } from "@/lib/sanity/queries"
 import type { Campaign } from "@/lib/sanity/types"
-import { HandHeart, Star, TrendingUp } from "lucide-react"
+import { getRecentEnablersFromFirestore, type Enabler } from "@/lib/firebase/firestore"
+import { HandHeart, TrendingUp } from "lucide-react"
 import Image from "next/image"
 import { notFound } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -22,6 +23,8 @@ export default function CampaignPage({ params }: CampaignPageProps) {
   const [customLessons, setCustomLessons] = useState("")
   const [animatedCount, setAnimatedCount] = useState(0)
   const [selectedUnits, setSelectedUnits] = useState<number>(0)
+  const [recentEnablers, setRecentEnablers] = useState<Enabler[]>([])
+  const [enablersLoading, setEnablersLoading] = useState(true)
 
   // Fetch campaign data from Sanity
   useEffect(() => {
@@ -55,6 +58,22 @@ export default function CampaignPage({ params }: CampaignPageProps) {
     return () => clearInterval(timer)
   }, [campaignData])
 
+  // Fetch recent enablers from Firestore
+  useEffect(() => {
+    async function fetchEnablers() {
+      setEnablersLoading(true)
+      try {
+        const enablers = await getRecentEnablersFromFirestore(params.campaign)
+        setRecentEnablers(enablers)
+      } catch (error) {
+        console.error("Error fetching enablers:", error)
+        setRecentEnablers([])
+      }
+      setEnablersLoading(false)
+    }
+    fetchEnablers()
+  }, [params.campaign])
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-refreshing bg-pattern-dots flex items-center justify-center">
@@ -87,22 +106,23 @@ export default function CampaignPage({ params }: CampaignPageProps) {
   const activeUnits = customLessons && Number.parseInt(customLessons) > 0 ? Number.parseInt(customLessons) : selectedUnits
   const activePrice = activeUnits * campaignData.unitPrice
 
-  // Mock data for community activity
-  const leaderboard = [
-    { name: "Ahmad", lessons: 365 },
-    { name: "Fatima", lessons: 180 },
-    { name: "Omar", lessons: 120 },
-    { name: "Aisha", lessons: 90 },
-    { name: "Yusuf", lessons: 60 },
-  ]
+  // Helper function to get time ago text
+  const getTimeAgo = (date: Date): string => {
+    const now = new Date()
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000)
 
-  const recentActivity = [
-    `Aisha ${campaignData.impactPrompt.past} 7 ${campaignData.impactItem.toLowerCase()}s`,
-    `Zayd ${campaignData.impactPrompt.past} 30 ${campaignData.impactItem.toLowerCase()}s`,
-    `Anonymous just ${campaignData.impactPrompt.past} 15 ${campaignData.impactItem.toLowerCase()}s`,
-    `Maryam ${campaignData.impactPrompt.past} 7 ${campaignData.impactItem.toLowerCase()}s`,
-    `Hassan ${campaignData.impactPrompt.past} 60 ${campaignData.impactItem.toLowerCase()}s`,
-  ]
+    if (diffInSeconds < 60) return 'just now'
+    if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60)
+      return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`
+    }
+    if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600)
+      return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`
+    }
+    const days = Math.floor(diffInSeconds / 86400)
+    return `${days} ${days === 1 ? 'day' : 'days'} ago`
+  }
 
   return (
     <div className="min-h-screen bg-refreshing bg-pattern-dots relative overflow-hidden">
@@ -223,9 +243,9 @@ export default function CampaignPage({ params }: CampaignPageProps) {
             <h2 className="text-4xl md:text-5xl font-serif font-light text-foreground mb-4">Community Impact</h2>
             <p className="text-xl text-muted-foreground">See how our community is making a difference</p>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Recent Activity */}
-            <Card className="p-8 shadow-soft border-0 bg-card">
+          <div className="flex justify-center">
+            {/* Recent Enablers */}
+            <Card className="p-8 shadow-soft border-0 bg-card w-full max-w-2xl">
               <div className="flex items-center gap-3 mb-8">
                 <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
                   <TrendingUp className="w-5 h-5 text-primary" />
@@ -233,41 +253,38 @@ export default function CampaignPage({ params }: CampaignPageProps) {
                 <h3 className="text-2xl font-serif font-light text-foreground">Recent {campaignData.impactPrompt.noun.charAt(0).toUpperCase() + campaignData.impactPrompt.noun.slice(1)}s</h3>
               </div>
               <div className="space-y-4">
-                {recentActivity.map((activity, index) => (
-                  <div
-                    key={index}
-                    className="p-4 bg-primary/5 border-l-4 border-primary rounded-r-xl animate-fade-in transition-all duration-200 hover:bg-primary/10"
-                    style={{ animationDelay: `${index * 0.1}s` }}
-                  >
-                    <p className="text-foreground font-medium">{activity}</p>
+                {enablersLoading ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                    <p className="text-muted-foreground mt-2">Loading enablers...</p>
                   </div>
-                ))}
-              </div>
-            </Card>
-
-            {/* Leaderboard */}
-            <Card className="p-8 shadow-soft border-0 bg-card">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-10 h-10 bg-accent/10 rounded-xl flex items-center justify-center">
-                  <Star className="w-5 h-5 text-accent" />
-                </div>
-                <h3 className="text-2xl font-serif font-light text-foreground">Top {campaignData.impactPrompt.noun.charAt(0).toUpperCase() + campaignData.impactPrompt.noun.slice(1)}s</h3>
-              </div>
-              <div className="space-y-4">
-                {leaderboard.map((enabler, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-4 p-4 bg-secondary/50 rounded-xl transition-all duration-200 hover:bg-secondary/70"
-                  >
-                    <div className="w-10 h-10 gradient-primary text-primary-foreground rounded-xl flex items-center justify-center font-semibold shrink-0">
-                      {index + 1}
-                    </div>
-                    <div className="flex-1 text-left">
-                      <div className="font-medium text-foreground text-lg">{enabler.name}</div>
-                      <div className="text-muted-foreground mt-1">{enabler.lessons} {campaignData.impactItem.toLowerCase()}s</div>
-                    </div>
+                ) : recentEnablers.length > 0 ? (
+                  recentEnablers.map((enabler, index) => {
+                    return (
+                      <div
+                        key={index}
+                        className="flex items-center gap-4 p-4 bg-secondary/50 rounded-xl transition-all duration-200 hover:bg-secondary/70"
+                      >
+                        <div className="w-10 h-10 gradient-primary text-primary-foreground rounded-xl flex items-center justify-center font-semibold shrink-0">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1 text-left">
+                          <div className="font-medium text-foreground text-lg">{enabler.name}</div>
+                          <div className="text-muted-foreground mt-1">
+                            {campaignData.impactPrompt.past.charAt(0).toUpperCase() + campaignData.impactPrompt.past.slice(1)} {enabler.impactUnits} {enabler.impactUnits === 1 ? campaignData.impactItem.toLowerCase() : `${campaignData.impactItem.toLowerCase()}s`}
+                          </div>
+                        </div>
+                        <div className="text-muted-foreground text-sm text-right shrink-0">
+                          {getTimeAgo(enabler.date)}
+                        </div>
+                      </div>
+                    )
+                  })
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">No recent {campaignData.impactPrompt.noun}s found</p>
                   </div>
-                ))}
+                )}
               </div>
             </Card>
 

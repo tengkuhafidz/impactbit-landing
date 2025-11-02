@@ -1,5 +1,6 @@
 import { client } from "@/sanity/lib/client"
 import { urlFor } from "@/sanity/lib/image"
+import { getCampaignStatsFromFirestore } from "@/lib/firebase/firestore"
 import { getCampaignStats } from "@/content/campaignStats"
 import type { Campaign, SanityCampaignRaw } from "./types"
 
@@ -72,14 +73,20 @@ const ALL_CAMPAIGNS_QUERY = `*[_type == "campaign"] | order(index asc) {
 /**
  * Transform raw Sanity campaign data into the Campaign type used by the app
  */
-function transformCampaign(rawCampaign: SanityCampaignRaw): Campaign {
+async function transformCampaign(rawCampaign: SanityCampaignRaw): Promise<Campaign> {
   // Convert Sanity image object to URL string
   const iconUrl = rawCampaign.iconPath
     ? urlFor(rawCampaign.iconPath).width(200).height(200).url()
     : ""
 
-  // Get stats from local config
-  const stats = getCampaignStats(rawCampaign.id)
+  // Get stats from Firestore
+  const firestoreStats = await getCampaignStatsFromFirestore(rawCampaign.id)
+
+  // Fallback to local stats if Firestore returns 0 or doesn't have data
+  const localStats = getCampaignStats(rawCampaign.id)
+  const totalImpactUnits = firestoreStats.totalUnitImpact > 0
+    ? firestoreStats.totalUnitImpact
+    : localStats.totalImpactUnits
 
   return {
     id: rawCampaign.id,
@@ -99,7 +106,7 @@ function transformCampaign(rawCampaign: SanityCampaignRaw): Campaign {
     organisationId: rawCampaign.organisation?.id || "",
     organisationName: rawCampaign.organisation?.name,
     impactPromptAlt: rawCampaign.impactPromptAlt,
-    totalImpactUnits: stats.totalImpactUnits,
+    totalImpactUnits,
     impactOptions: rawCampaign.impactOptions || []
   }
 }
@@ -146,7 +153,7 @@ export async function getAllCampaigns(): Promise<Campaign[]> {
       }
     )
 
-    return rawCampaigns.map(transformCampaign)
+    return Promise.all(rawCampaigns.map(transformCampaign))
   } catch (error) {
     console.error("Error fetching all campaigns:", error)
     return []
