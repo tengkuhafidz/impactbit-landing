@@ -1,3 +1,5 @@
+// no longer in use, kept as reference for future migrations
+
 export interface ImpactOption {
     label: string
     units: number
