@@ -228,6 +228,11 @@ export default function CampaignPage({ params }: CampaignPageProps) {
               )}
               <Button
                 disabled={activeUnits === 0}
+                onClick={() => {
+                  if (activeUnits > 0) {
+                    window.location.href = `https://impactbit.org/payment?campaign=${params.campaign}&quantity=${activeUnits}`
+                  }
+                }}
                 className="w-full h-14 text-lg bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-medium transition-all duration-200 hover:shadow-soft disabled:opacity-50 mt-6"
               >
                 Start Monthly Impact
