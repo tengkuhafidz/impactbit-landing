@@ -40,6 +40,7 @@ export interface SanityCampaignRaw {
   iconPath: SanityImageSource // This is a Sanity image object
   url: string
   unitImpact: number
+  targetMonthlyImpact?: number
   isFullySponsored?: boolean
   isFeatured?: boolean
   oneTimeUrl?: string
@@ -61,6 +62,7 @@ export interface Campaign {
   iconPath: string // Converted to URL string
   url: string
   unitImpact: number
+  targetMonthlyImpact?: number
   isFullySponsored?: boolean
   isFeatured?: boolean
   oneTimeUrl?: string

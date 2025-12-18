@@ -115,6 +115,13 @@ export default defineType({
       validation: Rule => Rule.required().min(0)
     }),
     defineField({
+      name: 'targetMonthlyImpact',
+      title: 'Target Monthly Impact',
+      type: 'number',
+      description: 'Target number of impact units to achieve per month',
+      validation: Rule => Rule.min(0)
+    }),
+    defineField({
       name: 'isFullySponsored',
       title: 'Is Fully Sponsored',
       type: 'boolean',
