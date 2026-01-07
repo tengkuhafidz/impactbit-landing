@@ -179,8 +179,8 @@ export default function CampaignPage({ params }: CampaignPageProps) {
           </div>
           <div className="flex justify-center">
             {/* Recent Enablers */}
-            <Card className="p-8 shadow-soft border-0 bg-card w-full max-w-2xl">
-              <div className="flex items-center gap-3 mb-8">
+            <Card className="p-5 md:p-8 shadow-soft border-0 bg-card w-full max-w-2xl">
+              <div className="flex items-center gap-3 mb-6 md:mb-8">
                 <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
                   <TrendingUp className="w-5 h-5 text-primary" />
                 </div>
@@ -197,19 +197,23 @@ export default function CampaignPage({ params }: CampaignPageProps) {
                     return (
                       <div
                         key={index}
-                        className="flex items-center gap-4 p-4 bg-secondary/50 rounded-xl transition-all duration-200 hover:bg-secondary/70"
+                        className="flex items-start gap-3 md:gap-4 p-3 md:p-4 bg-secondary/50 rounded-xl transition-all duration-200 hover:bg-secondary/70"
                       >
-                        <div className="w-10 h-10 gradient-primary text-primary-foreground rounded-xl flex items-center justify-center font-semibold shrink-0">
+                        <div className="w-8 h-8 md:w-10 md:h-10 gradient-primary text-primary-foreground rounded-lg md:rounded-xl flex items-center justify-center font-semibold shrink-0 text-sm md:text-base">
                           {index + 1}
                         </div>
-                        <div className="flex-1 text-left">
-                          <div className="font-medium text-foreground text-lg">{enabler.name}</div>
-                          <div className="text-muted-foreground mt-1">
-                            {campaignData.impactPrompt.past.charAt(0).toUpperCase() + campaignData.impactPrompt.past.slice(1)} {enabler.impactUnits} {enabler.impactUnits === 1 ? campaignData.impactItem.toLowerCase() : `${campaignData.impactItem.toLowerCase()}s`}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1 md:gap-4">
+                            <div className="min-w-0">
+                              <div className="font-medium text-foreground text-base md:text-lg truncate">{enabler.name}</div>
+                              <div className="text-muted-foreground text-sm md:text-base">
+                                {campaignData.impactPrompt.past.charAt(0).toUpperCase() + campaignData.impactPrompt.past.slice(1)} {enabler.impactUnits} {enabler.impactUnits === 1 ? campaignData.impactItem.toLowerCase() : `${campaignData.impactItem.toLowerCase()}s`}
+                              </div>
+                            </div>
+                            <div className="text-muted-foreground text-xs md:text-sm shrink-0">
+                              {getTimeAgo(enabler.date)}
+                            </div>
                           </div>
-                        </div>
-                        <div className="text-muted-foreground text-sm text-right shrink-0">
-                          {getTimeAgo(enabler.date)}
                         </div>
                       </div>
                     )

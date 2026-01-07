@@ -207,7 +207,9 @@ export function MonthlyImpactGoal({
                 {remainingAfterPreview > 0 ? `${remainingAfterPreview.toLocaleString()} more to go` : 'Fully sustained with your help!'}
               </span>
             ) : (
-              <span className="text-primary font-medium">{remaining.toLocaleString()} more to go</span>
+              <span className="text-primary font-medium">
+                {remaining > 0 ? `${remaining.toLocaleString()} more to go` : 'Target reached! 🎉'}
+              </span>
             )}
           </div>
         </div>
@@ -217,7 +219,7 @@ export function MonthlyImpactGoal({
           <>
             {isGoalMet ? (
               <p className="text-sm md:text-base text-accent font-medium text-center">
-                Thank you for your support!
+                This programme is fully sustained by the ImpactBit community 💛
               </p>
             ) : (
               <div className="text-center mt-8">
