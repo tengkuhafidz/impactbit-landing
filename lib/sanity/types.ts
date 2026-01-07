@@ -63,6 +63,7 @@ export interface Campaign {
   url: string
   unitImpact: number
   targetMonthlyImpact?: number
+  monthlyImpact?: number // Current month's impact from Firestore
   isFullySponsored?: boolean
   isFeatured?: boolean
   oneTimeUrl?: string

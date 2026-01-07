@@ -7,6 +7,7 @@ export interface FirestoreCampaignStats {
   totalDonors: number
   totalUnitImpact: number
   totalAdvocates?: number
+  monthlyImpact?: number
 }
 
 export interface FirestoreSubscription {
@@ -57,6 +58,7 @@ export async function getCampaignStatsFromFirestore(
         totalDonation: data.totalDonation || 0,
         totalDonors: data.totalDonors || 0,
         totalUnitImpact: data.totalUnitImpact || 0,
+        monthlyImpact: data.monthlyImpact || 0,
       }
     } else {
       return {
@@ -64,6 +66,7 @@ export async function getCampaignStatsFromFirestore(
         totalDonation: 0,
         totalDonors: 0,
         totalUnitImpact: 0,
+        monthlyImpact: 0,
       }
     }
   } catch (error) {
@@ -72,6 +75,7 @@ export async function getCampaignStatsFromFirestore(
       totalDonation: 0,
       totalDonors: 0,
       totalUnitImpact: 0,
+      monthlyImpact: 0,
     }
   }
 }

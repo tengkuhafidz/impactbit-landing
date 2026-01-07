@@ -103,6 +103,7 @@ async function transformCampaign(rawCampaign: SanityCampaignRaw): Promise<Campai
     url: rawCampaign.url,
     unitImpact: rawCampaign.unitImpact,
     targetMonthlyImpact: rawCampaign.targetMonthlyImpact,
+    monthlyImpact: firestoreStats.monthlyImpact || 0,
     isFullySponsored: rawCampaign.isFullySponsored,
     isFeatured: rawCampaign.isFeatured,
     oneTimeUrl: rawCampaign.oneTimeUrl,

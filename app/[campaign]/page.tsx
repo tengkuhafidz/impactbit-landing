@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { getCampaign } from "@/lib/sanity/queries"
 import type { Campaign } from "@/lib/sanity/types"
 import { getRecentEnablersFromFirestore, type Enabler } from "@/lib/firebase/firestore"
+import { MonthlyImpactGoal } from "@/components/monthly-impact-progress"
 import { HandHeart, TrendingUp } from "lucide-react"
 import Image from "next/image"
 import { notFound } from "next/navigation"
@@ -172,18 +173,19 @@ export default function CampaignPage({ params }: CampaignPageProps) {
             <h1 className="text-3xl md:text-5xl font-serif font-light text-foreground mb-4">
               {campaignData.title}
             </h1>
-            <p className="text-md md:text-xl text-muted-foreground  max-w-2xl mx-auto">
+            <p className="text-md md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12">
               {campaignData.description}
             </p>
-            <div className="number-glow mb-1 overflow-visible">
-              <span className="text-7xl md:text-9xl lg:text-[10rem] font-serif font-light number-highlight leading-tight block py-4">
-                {animatedCount.toLocaleString()}
-              </span>
-            </div>
-            <h2 className="text-2xl md:text-4xl lg:text-5xl font-serif font-light text-foreground leading-tight">
-              <span className="keep-together underline-accent">{campaignData.impactItem}s</span>{' '}
-              <span className="text-muted-foreground">{campaignData.impactPrompt.past.charAt(0).toUpperCase() + campaignData.impactPrompt.past.slice(1)}</span>
-            </h2>
+
+            {/* Monthly Impact Goal - Compact with progress */}
+            {campaignData.targetMonthlyImpact && campaignData.targetMonthlyImpact > 0 && (
+              <MonthlyImpactGoal
+                currentMonthlyImpact={campaignData.monthlyImpact || 0}
+                targetMonthlyImpact={campaignData.targetMonthlyImpact}
+                impactItem={campaignData.impactItem}
+                impactPromptPast={campaignData.impactPrompt.past}
+              />
+            )}
           </div>
         </div>
       </section>
@@ -307,7 +309,17 @@ export default function CampaignPage({ params }: CampaignPageProps) {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-serif font-light text-foreground mb-4">Community Impact</h2>
-            <p className="text-xl text-muted-foreground">See how our community is making a difference</p>
+            {/* Total Impact Stats */}
+            <div className="inline-block">
+              <div className="number-glow mb-1 overflow-visible">
+                <span className="text-5xl md:text-7xl font-serif font-light number-highlight leading-tight block py-2">
+                  {animatedCount.toLocaleString()}
+                </span>
+              </div>
+              <p className="text-lg md:text-xl font-serif font-light text-muted-foreground">
+                {campaignData.impactItem}s {campaignData.impactPrompt.past} to date
+              </p>
+            </div>
           </div>
           <div className="flex justify-center">
             {/* Recent Enablers */}
