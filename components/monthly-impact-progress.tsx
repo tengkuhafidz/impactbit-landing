@@ -3,18 +3,12 @@
 import * as React from 'react'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
-import { ChevronDown, ChevronUp } from 'lucide-react'
-
-interface ImpactOption {
-  label: string
-  units: number
-}
+import { ChevronDown, ChevronUp, Minus, Plus } from 'lucide-react'
 
 interface MonthlyImpactGoalProps {
   currentMonthlyImpact: number
   targetMonthlyImpact: number
   impactItem: string
-  impactOptions: ImpactOption[]
   unitPrice: number
   campaignSlug: string
   impactPromptContinuous: string
@@ -25,7 +19,6 @@ export function MonthlyImpactGoal({
   currentMonthlyImpact,
   targetMonthlyImpact,
   impactItem,
-  impactOptions,
   unitPrice,
   campaignSlug,
   impactPromptContinuous,
@@ -34,10 +27,9 @@ export function MonthlyImpactGoal({
   const [animatedCurrent, setAnimatedCurrent] = React.useState(0)
   const [animatedProgress, setAnimatedProgress] = React.useState(0)
   const [isExpanded, setIsExpanded] = React.useState(false)
-  const [hoverUnits, setHoverUnits] = React.useState(0)
   const [selectedUnits, setSelectedUnits] = React.useState(0)
   const [showConfirmation, setShowConfirmation] = React.useState(false)
-  const [customUnits, setCustomUnits] = React.useState('')
+  const [quantity, setQuantity] = React.useState(1)
 
   const percentage = targetMonthlyImpact > 0
     ? Math.round((currentMonthlyImpact / targetMonthlyImpact) * 100)
@@ -45,8 +37,8 @@ export function MonthlyImpactGoal({
   const displayPercentage = Math.min(percentage, 100)
   const remaining = Math.max(0, targetMonthlyImpact - currentMonthlyImpact)
 
-  // Preview calculations - use selectedUnits when in confirmation, otherwise hoverUnits
-  const activePreviewUnits = showConfirmation ? selectedUnits : hoverUnits
+  // Preview calculations - use selectedUnits when in confirmation, otherwise quantity when expanded
+  const activePreviewUnits = showConfirmation ? selectedUnits : (isExpanded ? quantity : 0)
   const rawPreviewPercentage = targetMonthlyImpact > 0
     ? Math.round((activePreviewUnits / targetMonthlyImpact) * 100)
     : 0
@@ -94,35 +86,39 @@ export function MonthlyImpactGoal({
 
   const isGoalMet = currentMonthlyImpact >= targetMonthlyImpact
 
-  const handleSelectOption = (units: number) => {
-    setSelectedUnits(units)
-    setCustomUnits('')
+  const handleIncrement = () => {
+    setQuantity(prev => prev + 1)
+  }
+
+  const handleDecrement = () => {
+    setQuantity(prev => Math.max(1, prev - 1))
+  }
+
+  const handleQuantityChange = (value: string) => {
+    // Only allow positive integers
+    const sanitized = value.replace(/[^0-9]/g, '')
+    if (sanitized === '') {
+      setQuantity(1)
+      return
+    }
+    const parsed = Number.parseInt(sanitized)
+    if (parsed >= 1) {
+      setQuantity(parsed)
+    }
+  }
+
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.select()
+  }
+
+  const handleConfirmImpact = () => {
+    setSelectedUnits(quantity)
     setShowConfirmation(true)
-  }
-
-  const handleCustomInputChange = (value: string) => {
-    setCustomUnits(value)
-    const parsed = Number.parseInt(value)
-    if (parsed > 0) {
-      setHoverUnits(parsed)
-    } else {
-      setHoverUnits(0)
-    }
-  }
-
-  const handleCustomSubmit = () => {
-    const parsed = Number.parseInt(customUnits)
-    if (parsed > 0) {
-      setSelectedUnits(parsed)
-      setShowConfirmation(true)
-    }
   }
 
   const handleGoBack = () => {
     setShowConfirmation(false)
     setSelectedUnits(0)
-    setHoverUnits(0)
-    setCustomUnits('')
   }
 
   const handleStartImpact = () => {
@@ -211,7 +207,7 @@ export function MonthlyImpactGoal({
                   onClick={() => setIsExpanded(!isExpanded)}
                   className="w-full py-3 px-6 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-all duration-200 hover:shadow-soft flex items-center justify-center gap-2"
                 >
-                  Help reach the goal
+                  Help us reach the goal
                   {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
               </div>
@@ -221,71 +217,49 @@ export function MonthlyImpactGoal({
       </div>
 
       {!showConfirmation ? (
-        /* Expandable options section */
+        /* Expandable quantity selector */
         <div className={cn(
           "overflow-hidden transition-all duration-300 ease-in-out",
-          isExpanded ? "max-h-[700px] opacity-100" : "max-h-0 opacity-0"
+          isExpanded ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"
         )}>
-          <div className="px-5 md:px-8 pb-5 md:pb-7 pt-2 border-t border-primary/10">
-            <p className="text-sm text-foreground text-center mb-1">
-              Every contribution helps close the gap.
+          <div className="px-5 md:px-8 pb-5 md:pb-7 pt-4 border-t border-primary/10">
+            <p className="text-lg md:text-xl text-foreground text-center mb-5">
+              How many {impactItem.toLowerCase()}s would you like to enable monthly?
             </p>
-            <p className="text-sm text-muted-foreground text-center mb-4">
-              Choose a monthly impact to enable:
-            </p>
-            <div className="space-y-3">
-              {impactOptions.map((option, index) => {
-                const isLastOption = index === impactOptions.length - 1
-                const optionPrice = option.units * unitPrice
 
-                return (
-                  <button
-                    key={index}
-                    onClick={() => handleSelectOption(option.units)}
-                    onMouseEnter={() => setHoverUnits(option.units)}
-                    onMouseLeave={() => setHoverUnits(0)}
-                    className={cn(
-                      "w-full min-h-[3.5rem] h-auto py-3 px-4 rounded-xl font-medium transition-all duration-200 hover:shadow-soft flex items-center justify-between",
-                      isLastOption
-                        ? "gradient-accent text-accent-foreground"
-                        : "bg-primary hover:bg-primary/90 text-primary-foreground"
-                    )}
-                  >
-                    <span className="text-left break-words">{option.label}</span>
-                    <span className="whitespace-nowrap font-semibold">${optionPrice.toLocaleString()}/mo</span>
-                  </button>
-                )
-              })}
+            {/* Quantity selector */}
+            <div className="flex items-center justify-center gap-3 mb-5">
+              <button
+                onClick={handleDecrement}
+                disabled={quantity <= 1}
+                className="w-12 h-12 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-medium transition-all duration-200 flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <Minus className="w-5 h-5" />
+              </button>
+              <input
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={quantity}
+                onChange={(e) => handleQuantityChange(e.target.value)}
+                onFocus={handleInputFocus}
+                className="w-24 h-14 text-center text-2xl font-semibold rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+              <button
+                onClick={handleIncrement}
+                className="w-12 h-12 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-medium transition-all duration-200 flex items-center justify-center"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
             </div>
 
-            {/* Custom input */}
-            <div className="mt-4 pt-4 border-t border-primary/10">
-              <p className="text-sm text-muted-foreground text-center mb-3">
-                Or enter a custom amount:
-              </p>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  placeholder={`Monthly ${impactItem.toLowerCase()}s`}
-                  value={customUnits}
-                  onChange={(e) => handleCustomInputChange(e.target.value)}
-                  onBlur={() => !customUnits && setHoverUnits(0)}
-                  className="flex-1 h-12 px-4 text-base rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                />
-                <button
-                  onClick={handleCustomSubmit}
-                  disabled={!customUnits || Number.parseInt(customUnits) <= 0}
-                  className="px-6 h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl transition-all duration-200 hover:shadow-soft disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Go
-                </button>
-              </div>
-              {customUnits && Number.parseInt(customUnits) > 0 && (
-                <p className="text-sm text-muted-foreground text-center mt-2">
-                  ${(Number.parseInt(customUnits) * unitPrice).toLocaleString()}/mo
-                </p>
-              )}
-            </div>
+            {/* Confirm button */}
+            <button
+              onClick={handleConfirmImpact}
+              className="w-full py-3 text-base gradient-accent text-accent-foreground rounded-xl font-medium transition-all duration-200 hover:shadow-elegant"
+            >
+              Donate ${(quantity * unitPrice).toLocaleString()} monthly
+            </button>
           </div>
         </div>
       ) : (
