@@ -2,12 +2,11 @@
 
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
 import { getCampaign } from "@/lib/sanity/queries"
 import type { Campaign } from "@/lib/sanity/types"
 import { getRecentEnablersFromFirestore, type Enabler } from "@/lib/firebase/firestore"
 import { MonthlyImpactGoal } from "@/components/monthly-impact-progress"
-import { HandHeart, TrendingUp } from "lucide-react"
+import { TrendingUp } from "lucide-react"
 import Image from "next/image"
 import { notFound } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -21,12 +20,9 @@ interface CampaignPageProps {
 export default function CampaignPage({ params }: CampaignPageProps) {
   const [campaignData, setCampaignData] = useState<Campaign | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [customLessons, setCustomLessons] = useState("")
   const [animatedCount, setAnimatedCount] = useState(0)
-  const [selectedUnits, setSelectedUnits] = useState<number>(0)
   const [recentEnablers, setRecentEnablers] = useState<Enabler[]>([])
   const [enablersLoading, setEnablersLoading] = useState(true)
-  const [showConfirmation, setShowConfirmation] = useState(false)
 
   // Fetch campaign data from Sanity
   useEffect(() => {
@@ -91,34 +87,6 @@ export default function CampaignPage({ params }: CampaignPageProps) {
     notFound()
   }
 
-  const handlePresetDonation = (units: number) => {
-    setSelectedUnits(units)
-    setCustomLessons("") // Clear custom input when preset is selected
-    setShowConfirmation(true)
-  }
-
-  const handleCustomInputChange = (value: string) => {
-    setCustomLessons(value)
-    if (value && Number.parseInt(value) > 0) {
-      setSelectedUnits(Number.parseInt(value))
-    } else if (!value) {
-      setSelectedUnits(0)
-    }
-  }
-
-  const handleGoBack = () => {
-    setShowConfirmation(false)
-  }
-
-  const handleStartImpact = () => {
-    if (activeUnits > 0) {
-      window.location.href = `https://impactbit.org/payment?campaign=${params.campaign}&quantity=${activeUnits}`
-    }
-  }
-
-  const activeUnits = customLessons && Number.parseInt(customLessons) > 0 ? Number.parseInt(customLessons) : selectedUnits
-  const activePrice = activeUnits * campaignData.unitPrice
-
   // Helper function to get time ago text
   const getTimeAgo = (date: Date): string => {
     const now = new Date()
@@ -160,7 +128,7 @@ export default function CampaignPage({ params }: CampaignPageProps) {
 
       <section className="px-6 py-12 text-center max-w-6xl mx-auto relative z-10">
         <div className="animate-slide-up">
-          <div className="mb-20 md:mb-24">
+          <div className="mb-8 md:mb-12">
             <div className="w-24 h-24 mx-auto mb-2 relative">
               <Image
                 src={campaignData.iconPath}
@@ -171,138 +139,26 @@ export default function CampaignPage({ params }: CampaignPageProps) {
               />
             </div>
             <h1 className="text-3xl md:text-5xl font-serif font-light text-foreground mb-4">
-              {campaignData.title}
+              <span className="text-muted-foreground">{campaignData.impactPrompt.present.charAt(0).toUpperCase() + campaignData.impactPrompt.present.slice(1)}</span> <span className="keep-together underline-accent">{campaignData.impactItem}s</span>
             </h1>
             <p className="text-md md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12">
               {campaignData.description}
             </p>
 
-            {/* Monthly Impact Goal - Compact with progress */}
+            {/* Monthly Impact Goal - Interactive with expandable options */}
             {campaignData.targetMonthlyImpact && campaignData.targetMonthlyImpact > 0 && (
               <MonthlyImpactGoal
                 currentMonthlyImpact={campaignData.monthlyImpact || 0}
                 targetMonthlyImpact={campaignData.targetMonthlyImpact}
                 impactItem={campaignData.impactItem}
-                impactPromptPast={campaignData.impactPrompt.past}
+                impactOptions={campaignData.impactOptions}
+                unitPrice={campaignData.unitPrice}
+                campaignSlug={params.campaign}
+                impactPromptContinuous={campaignData.impactPrompt.continuous}
               />
             )}
           </div>
         </div>
-      </section>
-
-      <section className="px-6 -mt-16 relative z-10">
-        <Card className="max-w-lg mx-auto p-8 shadow-elegant border-2 bg-card/95 backdrop-blur-sm animate-scale-in">
-          {!showConfirmation ? (
-            // Package Selection View
-            <>
-              <div className="text-center mb-6">
-                <HandHeart className="w-12 h-12 text-muted-foreground/90 mx-auto mb-4" />
-                <h2 className="text-2xl font-serif font-light text-foreground mb-2"><span className="text-muted-foreground">{campaignData.impactPrompt.present.charAt(0).toUpperCase() + campaignData.impactPrompt.present.slice(1)}</span> <span className="keep-together underline-accent">{campaignData.impactItem}s</span></h2>
-                <p className="text-muted-foreground text-sm">{campaignData.impactDescription}</p>
-              </div>
-
-              <div className="space-y-4 mb-8">
-                <p className="text-muted-foreground text-center">Choose your monthly impact</p>
-                {campaignData.impactOptions.map((option, index) => {
-                  const isHighlight = index === campaignData.impactOptions.length - 1
-                  return (
-                    <Button
-                      key={index}
-                      onClick={() => handlePresetDonation(option.units)}
-                      className={`w-full min-h-[3.5rem] h-auto py-3 px-4 text-base sm:text-lg ${isHighlight ? "gradient-accent text-accent-foreground" : "bg-primary hover:bg-primary/90 text-primary-foreground"} rounded-xl font-medium transition-all duration-200 hover:shadow-soft`}
-                    >
-                      <span className="flex items-center justify-between w-full gap-2 flex-wrap sm:flex-nowrap">
-                        <span className="text-left break-words">{option.label}</span>
-                        <span className="whitespace-nowrap font-semibold">${(option.units * campaignData.unitPrice).toLocaleString()}/mo</span>
-                      </span>
-                    </Button>
-                  )
-                })}
-                <p className="text-muted-foreground text-center mb-3">Or enter a custom amount</p>
-                <div className="space-y-3">
-                  <Input
-                    type="number"
-                    placeholder={`Enter number of ${campaignData.impactItem.toLowerCase()}s`}
-                    value={customLessons}
-                    onChange={(e) => handleCustomInputChange(e.target.value)}
-                    className="h-14 text-lg rounded-xl border-border bg-background"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-6 border-t border-border">
-                <div>
-                  {activeUnits > 0 && (
-                    <div className="p-4 bg-secondary/50 rounded-xl space-y-2 animate-fade-in">
-                      <p className="text-foreground font-medium">
-                        You are {campaignData.impactPrompt.continuous} {activeUnits} {activeUnits === 1 ? campaignData.impactItem.toLowerCase() : `${campaignData.impactItem.toLowerCase()}s`} every month
-                      </p>
-                      <p className="text-2xl font-semibold text-foreground">
-                        ${activePrice.toLocaleString()} monthly
-                      </p>
-                    </div>
-                  )}
-                  <Button
-                    disabled={activeUnits === 0}
-                    onClick={handleStartImpact}
-                    className="w-full h-14 text-lg bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-medium transition-all duration-200 hover:shadow-soft disabled:opacity-50 mt-6"
-                  >
-                    Start Monthly Impact
-                  </Button>
-                </div>
-              </div>
-            </>
-          ) : (
-            // Confirmation View
-            <div className="animate-fade-in">
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 gradient-primary rounded-full mx-auto mb-6 flex items-center justify-center animate-pulse-glow">
-                  <HandHeart className="w-8 h-8 text-primary-foreground" />
-                </div>
-                <h2 className="text-3xl font-serif font-light text-foreground mb-4">Your Impact</h2>
-              </div>
-
-              <div className="p-6 bg-gradient-to-br from-primary/10 to-accent/10 rounded-2xl mb-8 border-2 border-primary/20">
-                <div className="text-center space-y-4">
-                  <p className="text-lg text-muted-foreground">
-                    You will be {campaignData.impactPrompt.continuous}
-                  </p>
-                  <div className="py-4">
-                    <div className="text-6xl font-serif font-light text-foreground mb-2 number-highlight">
-                      {activeUnits}
-                    </div>
-                    <div className="text-2xl font-light text-foreground">
-                      {activeUnits === 1 ? campaignData.impactItem : `${campaignData.impactItem}s`}
-                    </div>
-                  </div>
-                  <p className="text-lg text-muted-foreground">every month</p>
-                  <div className="pt-4 border-t border-border/50">
-                    <div className="text-sm text-muted-foreground mb-1">Monthly contribution</div>
-                    <div className="text-4xl font-semibold text-foreground">
-                      ${activePrice.toLocaleString()}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <Button
-                  onClick={handleStartImpact}
-                  className="w-full h-16 text-xl gradient-accent text-accent-foreground rounded-xl font-medium transition-all duration-200 hover:shadow-elegant"
-                >
-                  Start This Impact
-                </Button>
-                <Button
-                  onClick={handleGoBack}
-                  variant="outline"
-                  className="w-full h-12 text-base rounded-xl font-medium transition-all duration-200 hover:bg-secondary"
-                >
-                  Back
-                </Button>
-              </div>
-            </div>
-          )}
-        </Card>
       </section>
 
       <section className="px-6 py-24 relative z-10">
