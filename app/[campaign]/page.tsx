@@ -151,6 +151,7 @@ export default function CampaignPage({ params }: CampaignPageProps) {
                 currentMonthlyImpact={campaignData.monthlyImpact || 0}
                 targetMonthlyImpact={campaignData.targetMonthlyImpact}
                 impactItem={campaignData.impactItem}
+                impactOptions={campaignData.impactOptions}
                 unitPrice={campaignData.unitPrice}
                 campaignSlug={params.campaign}
                 impactPromptContinuous={campaignData.impactPrompt.continuous}

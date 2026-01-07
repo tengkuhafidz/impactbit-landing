@@ -5,10 +5,16 @@ import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 import { ChevronDown, ChevronUp, Minus, Plus } from 'lucide-react'
 
+interface ImpactOption {
+  label: string
+  units: number
+}
+
 interface MonthlyImpactGoalProps {
   currentMonthlyImpact: number
   targetMonthlyImpact: number
   impactItem: string
+  impactOptions: ImpactOption[]
   unitPrice: number
   campaignSlug: string
   impactPromptContinuous: string
@@ -19,6 +25,7 @@ export function MonthlyImpactGoal({
   currentMonthlyImpact,
   targetMonthlyImpact,
   impactItem,
+  impactOptions,
   unitPrice,
   campaignSlug,
   impactPromptContinuous,
@@ -29,6 +36,7 @@ export function MonthlyImpactGoal({
   const [isExpanded, setIsExpanded] = React.useState(false)
   const [selectedUnits, setSelectedUnits] = React.useState(0)
   const [showConfirmation, setShowConfirmation] = React.useState(false)
+  const [showCustomInput, setShowCustomInput] = React.useState(false)
   const [quantity, setQuantity] = React.useState(1)
 
   const percentage = targetMonthlyImpact > 0
@@ -37,8 +45,8 @@ export function MonthlyImpactGoal({
   const displayPercentage = Math.min(percentage, 100)
   const remaining = Math.max(0, targetMonthlyImpact - currentMonthlyImpact)
 
-  // Preview calculations - use selectedUnits when in confirmation, otherwise quantity when expanded
-  const activePreviewUnits = showConfirmation ? selectedUnits : (isExpanded ? quantity : 0)
+  // Preview calculations - use selectedUnits when in confirmation, quantity when in custom input, otherwise 0
+  const activePreviewUnits = showConfirmation ? selectedUnits : (showCustomInput ? quantity : 0)
   const rawPreviewPercentage = targetMonthlyImpact > 0
     ? Math.round((activePreviewUnits / targetMonthlyImpact) * 100)
     : 0
@@ -86,6 +94,15 @@ export function MonthlyImpactGoal({
 
   const isGoalMet = currentMonthlyImpact >= targetMonthlyImpact
 
+  const handleSelectOption = (units: number) => {
+    setSelectedUnits(units)
+    setShowConfirmation(true)
+  }
+
+  const handleCustomClick = () => {
+    setShowCustomInput(true)
+  }
+
   const handleIncrement = () => {
     setQuantity(prev => prev + 1)
   }
@@ -111,14 +128,15 @@ export function MonthlyImpactGoal({
     e.target.select()
   }
 
-  const handleConfirmImpact = () => {
-    setSelectedUnits(quantity)
-    setShowConfirmation(true)
-  }
-
   const handleGoBack = () => {
     setShowConfirmation(false)
+    setShowCustomInput(false)
     setSelectedUnits(0)
+    setQuantity(1)
+  }
+
+  const handleCustomDonate = () => {
+    window.location.href = `https://impactbit.org/payment?campaign=${campaignSlug}&quantity=${quantity}`
   }
 
   const handleStartImpact = () => {
@@ -216,13 +234,44 @@ export function MonthlyImpactGoal({
         )}
       </div>
 
-      {!showConfirmation ? (
-        /* Expandable quantity selector */
-        <div className={cn(
-          "overflow-hidden transition-all duration-300 ease-in-out",
-          isExpanded ? "max-h-[400px] opacity-100" : "max-h-0 opacity-0"
-        )}>
+      {/* Expandable section */}
+      <div className={cn(
+        "overflow-hidden transition-all duration-300 ease-in-out",
+        isExpanded ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
+      )}>
+        {!showConfirmation && !showCustomInput ? (
+          /* Options view - preset buttons + custom */
           <div className="px-5 md:px-8 pb-5 md:pb-7 pt-4 border-t border-primary/10">
+            <p className="text-sm text-muted-foreground text-center mb-4">
+              Choose your monthly impact:
+            </p>
+            <div className="space-y-3">
+              {impactOptions.map((option, index) => {
+                const optionPrice = option.units * unitPrice
+
+                return (
+                  <button
+                    key={index}
+                    onClick={() => handleSelectOption(option.units)}
+                    className="w-full min-h-[3.5rem] h-auto py-3 px-4 rounded-xl font-medium transition-all duration-200 hover:shadow-soft flex items-center justify-between bg-primary hover:bg-primary/90 text-primary-foreground"
+                  >
+                    <span className="text-left break-words">{option.label}</span>
+                    <span className="whitespace-nowrap font-semibold">${optionPrice.toLocaleString()}/mo</span>
+                  </button>
+                )
+              })}
+              {/* Custom amount button */}
+              <button
+                onClick={handleCustomClick}
+                className="w-full min-h-[3.5rem] h-auto py-3 px-4 rounded-xl font-medium transition-all duration-200 hover:shadow-soft gradient-accent text-accent-foreground"
+              >
+                Choose a custom amount
+              </button>
+            </div>
+          </div>
+        ) : showCustomInput ? (
+          /* Custom input view */
+          <div className="px-5 md:px-8 pb-5 md:pb-7 pt-4 border-t border-primary/10 animate-slide-right">
             <p className="text-lg md:text-xl text-foreground text-center mb-5">
               How many {impactItem.toLowerCase()}s would you like to enable monthly?
             </p>
@@ -253,57 +302,65 @@ export function MonthlyImpactGoal({
               </button>
             </div>
 
-            {/* Confirm button */}
-            <button
-              onClick={handleConfirmImpact}
-              className="w-full py-3 text-base gradient-accent text-accent-foreground rounded-xl font-medium transition-all duration-200 hover:shadow-elegant"
-            >
-              Donate ${(quantity * unitPrice).toLocaleString()} monthly
-            </button>
+            {/* Buttons */}
+            <div className="space-y-3">
+              <button
+                onClick={handleCustomDonate}
+                className="w-full py-3 text-base gradient-accent text-accent-foreground rounded-xl font-medium transition-all duration-200 hover:shadow-elegant"
+              >
+                Donate ${(quantity * unitPrice).toLocaleString()} monthly
+              </button>
+              <button
+                onClick={handleGoBack}
+                className="w-full py-2.5 text-sm rounded-xl font-medium transition-all duration-200 hover:bg-secondary border border-border"
+              >
+                Back
+              </button>
+            </div>
           </div>
-        </div>
-      ) : (
-        /* Confirmation View - replaces only the options area */
-        <div className="px-5 md:px-8 pb-5 md:pb-7 pt-6 border-t border-primary/10 animate-slide-right">
-          <div className="p-4 bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl mb-4 border border-primary/20">
-            <div className="text-center space-y-2">
-              <p className="text-sm text-muted-foreground">
-                You will be {impactPromptContinuous}
-              </p>
-              <div className="py-2">
-                <div className="text-4xl md:text-5xl font-serif font-light text-foreground mb-1">
-                  {selectedUnits}
+        ) : (
+          /* Confirmation View - replaces only the options area */
+          <div className="px-5 md:px-8 pb-5 md:pb-7 pt-6 border-t border-primary/10 animate-slide-right">
+            <div className="p-4 bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl mb-4 border border-primary/20">
+              <div className="text-center space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  You will be {impactPromptContinuous}
+                </p>
+                <div className="py-2">
+                  <div className="text-4xl md:text-5xl font-serif font-light text-foreground mb-1">
+                    {selectedUnits}
+                  </div>
+                  <div className="text-lg font-light text-foreground">
+                    {selectedUnits === 1 ? impactItem : `${impactItem}s`}
+                  </div>
                 </div>
-                <div className="text-lg font-light text-foreground">
-                  {selectedUnits === 1 ? impactItem : `${impactItem}s`}
-                </div>
-              </div>
-              <p className="text-sm text-muted-foreground">every month</p>
-              <div className="pt-2 border-t border-border/50">
-                <div className="text-xs text-muted-foreground mb-1">Monthly contribution</div>
-                <div className="text-2xl font-semibold text-foreground">
-                  ${activePrice.toLocaleString()}
+                <p className="text-sm text-muted-foreground">every month</p>
+                <div className="pt-2 border-t border-border/50">
+                  <div className="text-xs text-muted-foreground mb-1">Monthly contribution</div>
+                  <div className="text-2xl font-semibold text-foreground">
+                    ${activePrice.toLocaleString()}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="space-y-3">
-            <button
-              onClick={handleStartImpact}
-              className="w-full py-3 text-base gradient-accent text-accent-foreground rounded-xl font-medium transition-all duration-200 hover:shadow-elegant"
-            >
-              Start This Impact
-            </button>
-            <button
-              onClick={handleGoBack}
-              className="w-full py-2.5 text-sm rounded-xl font-medium transition-all duration-200 hover:bg-secondary border border-border"
-            >
-              Back
-            </button>
+            <div className="space-y-3">
+              <button
+                onClick={handleStartImpact}
+                className="w-full py-3 text-base gradient-accent text-accent-foreground rounded-xl font-medium transition-all duration-200 hover:shadow-elegant"
+              >
+                Start This Impact
+              </button>
+              <button
+                onClick={handleGoBack}
+                className="w-full py-2.5 text-sm rounded-xl font-medium transition-all duration-200 hover:bg-secondary border border-border"
+              >
+                Back
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
