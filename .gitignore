@@ -28,3 +28,6 @@ next-env.d.ts
 
 # DS Store
 .DS_Store
+
+# IDE project files
+/.idea
