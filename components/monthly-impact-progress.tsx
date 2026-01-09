@@ -166,7 +166,7 @@ export function MonthlyImpactGoal({
             <span className="text-xl md:text-2xl font-semibold text-foreground">{targetMonthlyImpact.toLocaleString()}</span>
           </div>
           <p className="text-sm md:text-base text-muted-foreground mt-1">
-            {impactItem.toLowerCase()}s enabled monthly
+            {impactItem.toLowerCase()}s sponsored monthly
           </p>
         </div>
 
@@ -275,7 +275,7 @@ export function MonthlyImpactGoal({
           /* Custom input view */
           <div className="px-5 md:px-8 pb-5 md:pb-7 pt-4 border-t border-primary/10 animate-slide-right">
             <p className="text-lg md:text-xl text-foreground text-center mb-5">
-              How many {impactItem.toLowerCase()}s would you like to enable monthly?
+              How many {impactItem.toLowerCase()}s would you like to sponsor monthly?
             </p>
 
             {/* Quantity selector */}
