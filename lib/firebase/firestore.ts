@@ -1,5 +1,5 @@
 import { db } from "./config"
-import { collection, doc, getDoc, query, orderBy, limit, getDocs, where } from "firebase/firestore"
+import { collection, doc, getDoc, query, orderBy, limit, getDocs, where, onSnapshot, Unsubscribe } from "firebase/firestore"
 
 export interface FirestoreCampaignStats {
   lastUpdated: Date
@@ -130,6 +130,79 @@ export async function getRecentEnablersFromFirestore(
   } catch (error) {
     return []
   }
+}
+
+/**
+ * Fetch enablers from the last 24 hours
+ * @returns Array of enablers from the last 24 hours ordered by updatedAt
+ */
+export async function getEnablersFromLast24Hours(): Promise<Enabler[]> {
+  try {
+    const subscriptionsRef = collection(db, "subscriptions")
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+
+    const q = query(
+      subscriptionsRef,
+      where("updatedAt", ">=", twentyFourHoursAgo),
+      orderBy("updatedAt", "desc")
+    )
+
+    const querySnapshot = await getDocs(q)
+
+    const enablers: Enabler[] = []
+    querySnapshot.forEach((doc) => {
+      const data = doc.data()
+      enablers.push({
+        name: data.name || "Anonymous",
+        amount: (data.unitPrice || 0) * (data.quantity || 1),
+        date: data.updatedAt?.toDate() || new Date(),
+        isActive: data.isActive || false,
+        impactUnits: data.unitImpact * data.quantity || 0,
+        campaignId: data.campaignId || ""
+      })
+    })
+
+    return enablers
+  } catch (error) {
+    console.error("Error fetching enablers from last 24 hours:", error)
+    return []
+  }
+}
+
+/**
+ * Subscribe to real-time enabler updates from the last 24 hours
+ * @param onUpdate - Callback function that receives the updated enablers array
+ * @returns Unsubscribe function to stop listening
+ */
+export function subscribeToEnablersFromLast24Hours(
+  onUpdate: (enablers: Enabler[]) => void
+): Unsubscribe {
+  const subscriptionsRef = collection(db, "subscriptions")
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+
+  const q = query(
+    subscriptionsRef,
+    where("updatedAt", ">=", twentyFourHoursAgo),
+    orderBy("updatedAt", "desc")
+  )
+
+  return onSnapshot(q, (querySnapshot) => {
+    const enablers: Enabler[] = []
+    querySnapshot.forEach((doc) => {
+      const data = doc.data()
+      enablers.push({
+        name: data.name || "Anonymous",
+        amount: (data.unitPrice || 0) * (data.quantity || 1),
+        date: data.updatedAt?.toDate() || new Date(),
+        isActive: data.isActive || false,
+        impactUnits: data.unitImpact * data.quantity || 0,
+        campaignId: data.campaignId || ""
+      })
+    })
+    onUpdate(enablers)
+  }, (error) => {
+    console.error("Error subscribing to enablers:", error)
+  })
 }
 
 /**

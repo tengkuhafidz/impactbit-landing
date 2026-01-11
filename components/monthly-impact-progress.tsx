@@ -217,7 +217,7 @@ export function MonthlyImpactGoal({
           <>
             {isGoalMet ? (
               <p className="text-sm md:text-base text-accent font-medium text-center">
-                This programme is fully sustained by the ImpactBit community 💛
+                This programme is fully sustained by the Impactbit community 💛
               </p>
             ) : (
               <div className="text-center mt-8">

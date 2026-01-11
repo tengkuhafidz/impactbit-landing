@@ -211,6 +211,22 @@
   animation: pulse-glow 4s ease-in-out infinite;
 }
 
+/* Card pop animation for activity grid */
+@keyframes card-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-card-pop {
+  animation: card-pop 0.4s ease-out forwards;
+}
+
 /* Modern gradient and shadow utilities */
 .gradient-primary {
   background: linear-gradient(135deg, oklch(0.25 0.08 155) 0%, oklch(0.35 0.1 125) 100%);
@@ -371,4 +387,40 @@
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* Bubble animations for impact page */
+@keyframes bubble-settle {
+  0% {
+    transform: translateY(100vh) scale(0.5);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(-20px) scale(1.05);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(10px) scale(0.98);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes wobble {
+  0%, 100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  50% {
+    transform: translateX(3px) rotate(1deg);
+  }
+}
+
+.animate-bubble-settle {
+  animation: bubble-settle 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-wobble {
+  animation: wobble 3s ease-in-out infinite;
 }

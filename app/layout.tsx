@@ -7,7 +7,7 @@ import { Suspense } from "react"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "ImpactBit - Creating Impact Together",
+  title: "Impactbit",
   description:
     "Join thousands making a difference through micro-donations. Every contribution creates lasting change in our community.",
   generator: "v0.app",
