@@ -391,9 +391,8 @@ export default function ImpactPage() {
       // Sort by date ascending (oldest first, so they drop first)
       .sort((a, b) => a.date.getTime() - b.date.getTime())
 
-    // Create a unique ID for each contribution based on name + date + amount
-    const getContributionId = (c: Enabler) =>
-      `${c.name}-${c.date.getTime()}-${c.amount}-${c.campaignId}`
+    // Use Firestore document ID for uniqueness
+    const getContributionId = (c: Enabler) => c.id
 
     // Check if this is the initial load or a real-time update
     const isInitialLoad = processedContributionsRef.current.size === 0
@@ -481,15 +480,6 @@ export default function ImpactPage() {
         // Add new balls to existing ones
         ballsRef.current = [...ballsRef.current, ...newBalls]
         setBalls([...ballsRef.current])
-
-        // Clear "isNew" flag after 5 seconds
-        setTimeout(() => {
-          newBallIds.forEach((id) => {
-            const ball = ballsRef.current.find((b) => b.id === id)
-            if (ball) ball.isNew = false
-          })
-          setBalls([...ballsRef.current])
-        }, 5000)
 
         // Restart animation if it stopped
         if (!animatingRef.current) {

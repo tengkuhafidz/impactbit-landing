@@ -32,6 +32,7 @@ export interface FirestoreSubscription {
 }
 
 export interface Enabler {
+  id: string // Firestore document ID
   name: string
   amount: number
   impactUnits: number
@@ -114,9 +115,10 @@ export async function getRecentEnablersFromFirestore(
     const querySnapshot = await getDocs(q)
 
     const enablers: Enabler[] = []
-    querySnapshot.forEach((doc) => {
-      const data = doc.data()
+    querySnapshot.forEach((docSnapshot) => {
+      const data = docSnapshot.data()
       enablers.push({
+        id: docSnapshot.id,
         name: data.name || "Anonymous",
         amount: (data.unitPrice || 0) * (data.quantity || 1),
         date: data.updatedAt?.toDate() || new Date(),
@@ -150,9 +152,10 @@ export async function getEnablersFromLast24Hours(): Promise<Enabler[]> {
     const querySnapshot = await getDocs(q)
 
     const enablers: Enabler[] = []
-    querySnapshot.forEach((doc) => {
-      const data = doc.data()
+    querySnapshot.forEach((docSnapshot) => {
+      const data = docSnapshot.data()
       enablers.push({
+        id: docSnapshot.id,
         name: data.name || "Anonymous",
         amount: (data.unitPrice || 0) * (data.quantity || 1),
         date: data.updatedAt?.toDate() || new Date(),
@@ -188,9 +191,10 @@ export function subscribeToEnablersFromLast24Hours(
 
   return onSnapshot(q, (querySnapshot) => {
     const enablers: Enabler[] = []
-    querySnapshot.forEach((doc) => {
-      const data = doc.data()
+    querySnapshot.forEach((docSnapshot) => {
+      const data = docSnapshot.data()
       enablers.push({
+        id: docSnapshot.id, // Use Firestore document ID for uniqueness
         name: data.name || "Anonymous",
         amount: (data.unitPrice || 0) * (data.quantity || 1),
         date: data.updatedAt?.toDate() || new Date(),
