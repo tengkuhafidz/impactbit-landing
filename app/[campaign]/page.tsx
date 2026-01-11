@@ -139,7 +139,7 @@ export default function CampaignPage({ params }: CampaignPageProps) {
               />
             </div>
             <h1 className="text-3xl md:text-5xl font-serif font-light text-foreground mb-4">
-              <span className="text-muted-foreground">{campaignData.impactPrompt.present.charAt(0).toUpperCase() + campaignData.impactPrompt.present.slice(1)}</span> <span className="keep-together underline-accent">{campaignData.impactItem}s</span>
+              <span className="text-muted-foreground">Sponsor</span> <span className="keep-together underline-accent">{campaignData.impactItem}s</span>
             </h1>
             <p className="text-md md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12">
               {campaignData.description}
@@ -154,7 +154,6 @@ export default function CampaignPage({ params }: CampaignPageProps) {
                 impactOptions={campaignData.impactOptions}
                 unitPrice={campaignData.unitPrice}
                 campaignSlug={params.campaign}
-                impactPromptContinuous={campaignData.impactPrompt.continuous}
               />
             )}
           </div>
@@ -173,7 +172,7 @@ export default function CampaignPage({ params }: CampaignPageProps) {
                 </span>
               </div>
               <p className="text-lg md:text-xl font-serif font-light text-muted-foreground">
-                {campaignData.impactItem}s {campaignData.impactPrompt.past} to date
+                {campaignData.impactItem}s sponsored to date
               </p>
             </div>
           </div>
@@ -184,7 +183,7 @@ export default function CampaignPage({ params }: CampaignPageProps) {
                 <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
                   <TrendingUp className="w-5 h-5 text-primary" />
                 </div>
-                <h3 className="text-2xl font-serif font-light text-foreground">Recent {campaignData.impactPrompt.noun.charAt(0).toUpperCase() + campaignData.impactPrompt.noun.slice(1)}s</h3>
+                <h3 className="text-2xl font-serif font-light text-foreground">Recent Sponsors</h3>
               </div>
               <div className="space-y-4">
                 {enablersLoading ? (
@@ -207,7 +206,7 @@ export default function CampaignPage({ params }: CampaignPageProps) {
                             <div className="min-w-0">
                               <div className="font-medium text-foreground text-base md:text-lg truncate">{enabler.name}</div>
                               <div className="text-muted-foreground text-sm md:text-base">
-                                {campaignData.impactPrompt.past.charAt(0).toUpperCase() + campaignData.impactPrompt.past.slice(1)} {enabler.impactUnits} {enabler.impactUnits === 1 ? campaignData.impactItem.toLowerCase() : `${campaignData.impactItem.toLowerCase()}s`}
+                                Sponsored {enabler.impactUnits} {enabler.impactUnits === 1 ? campaignData.impactItem.toLowerCase() : `${campaignData.impactItem.toLowerCase()}s`}
                               </div>
                             </div>
                             <div className="text-muted-foreground text-xs md:text-sm shrink-0">
@@ -220,7 +219,7 @@ export default function CampaignPage({ params }: CampaignPageProps) {
                   })
                 ) : (
                   <div className="text-center py-8">
-                    <p className="text-muted-foreground">No recent {campaignData.impactPrompt.noun}s found</p>
+                    <p className="text-muted-foreground">No recent sponsors found</p>
                   </div>
                 )}
               </div>
@@ -236,13 +235,13 @@ export default function CampaignPage({ params }: CampaignPageProps) {
             Be part of this mission.
           </h2>
           <p className="text-xl text-primary-foreground/80 mb-12 max-w-2xl mx-auto">
-            {campaignData.impactPrompt.present.charAt(0).toUpperCase() + campaignData.impactPrompt.present.slice(1)} {campaignData.impactItem.toLowerCase()}s today and join thousands making knowledge accessible worldwide.
+            Sponsor {campaignData.impactItem.toLowerCase()}s today and join thousands making knowledge accessible worldwide.
           </p>
           <Button
             onClick={() => window.scrollTo({ top: 600, behavior: "smooth" })}
             className="h-14 px-12 text-lg bg-primary-foreground text-primary hover:bg-primary-foreground/90 rounded-xl font-medium shadow-soft transition-all duration-200 hover:shadow-elegant"
           >
-            {campaignData.impactPrompt.present.charAt(0).toUpperCase() + campaignData.impactPrompt.present.slice(1)} {campaignData.impactItem}s
+            Sponsor {campaignData.impactItem}s
           </Button>
         </div>
       </section>

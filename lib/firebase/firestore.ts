@@ -37,6 +37,7 @@ export interface Enabler {
   impactUnits: number
   date: Date
   isActive: boolean
+  campaignId?: string
 }
 
 /**
@@ -120,7 +121,8 @@ export async function getRecentEnablersFromFirestore(
         amount: (data.unitPrice || 0) * (data.quantity || 1),
         date: data.updatedAt?.toDate() || new Date(),
         isActive: data.isActive || false,
-        impactUnits: data.unitImpact * data.quantity || 0
+        impactUnits: data.unitImpact * data.quantity || 0,
+        campaignId: data.campaignId || ""
       })
     })
 

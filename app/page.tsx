@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { getAllCampaigns } from "@/lib/sanity/queries"
-import { getOverallStatsFromFirestore } from "@/lib/firebase/firestore"
+import { getOverallStatsFromFirestore, getRecentEnablersFromFirestore, Enabler } from "@/lib/firebase/firestore"
 import type { Campaign } from "@/lib/sanity/types"
+import { ActivityTicker } from "@/components/activity-ticker"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -17,6 +18,8 @@ export default function HomePage() {
   const [animatedImpact, setAnimatedImpact] = useState(0)
   const [impactCreators, setImpactCreators] = useState(0)
   const [impactAdvocates, setImpactAdvocates] = useState(0)
+  const [recentContributions, setRecentContributions] = useState<Enabler[]>([])
+  const [contributionsLoading, setContributionsLoading] = useState(true)
 
   // Fetch campaigns from Sanity
   useEffect(() => {
@@ -50,6 +53,21 @@ export default function HomePage() {
       }
     }
     fetchOverallStats()
+  }, [])
+
+  // Fetch recent contributions across all campaigns
+  useEffect(() => {
+    async function fetchRecentContributions() {
+      setContributionsLoading(true)
+      try {
+        const contributions = await getRecentEnablersFromFirestore(undefined, 10)
+        setRecentContributions(contributions)
+      } catch (error) {
+        console.error("Error fetching recent contributions:", error)
+      }
+      setContributionsLoading(false)
+    }
+    fetchRecentContributions()
   }, [])
 
   // Calculate overall impact
@@ -190,6 +208,23 @@ export default function HomePage() {
             </Card>
 
           </div>
+        </div>
+      </section>
+
+      {/* Live Activity Ticker */}
+      <section className="py-8 md:py-12 relative z-10">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-6">
+            <p className="text-sm text-muted-foreground uppercase tracking-wider font-medium flex items-center justify-center gap-2">
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+              Recent Activities
+            </p>
+          </div>
+          <ActivityTicker
+            contributions={recentContributions}
+            campaigns={campaigns}
+            isLoading={contributionsLoading}
+          />
         </div>
       </section>
 

@@ -17,7 +17,6 @@ interface MonthlyImpactGoalProps {
   impactOptions: ImpactOption[]
   unitPrice: number
   campaignSlug: string
-  impactPromptContinuous: string
   className?: string
 }
 
@@ -28,7 +27,6 @@ export function MonthlyImpactGoal({
   impactOptions,
   unitPrice,
   campaignSlug,
-  impactPromptContinuous,
   className
 }: MonthlyImpactGoalProps) {
   const [animatedCurrent, setAnimatedCurrent] = React.useState(0)
@@ -326,7 +324,7 @@ export function MonthlyImpactGoal({
             <div className="p-4 bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl mb-4 border border-primary/20">
               <div className="text-center space-y-2">
                 <p className="text-sm text-muted-foreground">
-                  You will be {impactPromptContinuous}
+                  You will be sponsoring
                 </p>
                 <div className="py-2">
                   <div className="text-4xl md:text-5xl font-serif font-light text-foreground mb-1">
