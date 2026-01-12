@@ -640,7 +640,7 @@ export default function ImpactPage() {
                 p-2 text-center
                 cursor-pointer
                 relative
-                ${ball.isNew ? 'animate-pulse ring-4 ring-white/60' : ''}
+                ${ball.isNew ? 'ring-4 ring-white/60' : ''}
               `}
               style={{
                 boxShadow: ball.isNew
