@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { getAllCampaigns } from "@/lib/sanity/queries"
 import {
   subscribeToEnablersFromLast24Hours,
@@ -48,6 +48,7 @@ export default function ImpactPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [balls, setBalls] = useState<Ball[]>([])
   const [, setTick] = useState(0)
+  const [deviceType, setDeviceType] = useState<'mobile' | 'tablet' | 'desktop'>('desktop')
 
   const containerRef = useRef<HTMLDivElement>(null)
   const ballsRef = useRef<Ball[]>([])
@@ -60,6 +61,23 @@ export default function ImpactPage() {
   useEffect(() => {
     audioRef.current = new Audio("/new-contribution.mp3")
     audioRef.current.volume = 0.5
+  }, [])
+
+  // Detect device type based on viewport
+  useEffect(() => {
+    const checkDeviceType = () => {
+      const width = window.innerWidth
+      if (width < 768) {
+        setDeviceType('mobile')
+      } else if (width < 1024) {
+        setDeviceType('tablet')
+      } else {
+        setDeviceType('desktop')
+      }
+    }
+    checkDeviceType()
+    window.addEventListener("resize", checkDeviceType)
+    return () => window.removeEventListener("resize", checkDeviceType)
   }, [])
 
   // Drag state
@@ -118,6 +136,13 @@ export default function ImpactPage() {
     (campaignId: string) => campaigns.find((c) => c.id === campaignId),
     [campaigns]
   )
+
+  // Filter contributions based on time window (6h mobile, 12h tablet, 24h desktop)
+  const timeWindowHours = deviceType === 'mobile' ? 6 : deviceType === 'tablet' ? 12 : 24
+  const filteredContributions = useMemo(() => {
+    const cutoffTime = new Date(Date.now() - timeWindowHours * 60 * 60 * 1000)
+    return contributions.filter((c) => c.date >= cutoffTime)
+  }, [contributions, timeWindowHours])
 
   const getTimeAgo = (date: Date) => {
     const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000)
@@ -379,14 +404,14 @@ export default function ImpactPage() {
 
   // Initialize balls when data loads and handle new real-time contributions
   useEffect(() => {
-    if (campaigns.length === 0 || contributions.length === 0) return
+    if (campaigns.length === 0 || filteredContributions.length === 0) return
 
     // Use window dimensions for full viewport
     const viewportWidth = window.innerWidth
     const viewportHeight = window.innerHeight
     containerSizeRef.current = { width: viewportWidth, height: viewportHeight }
 
-    const validContributions = contributions
+    const validContributions = filteredContributions
       .filter((c) => getCampaign(c.campaignId || ""))
       // Sort by date ascending (oldest first, so they drop first)
       .sort((a, b) => a.date.getTime() - b.date.getTime())
@@ -488,7 +513,7 @@ export default function ImpactPage() {
         }
       }
     }
-  }, [campaigns, contributions, getCampaign, runPhysics])
+  }, [campaigns, filteredContributions, getCampaign, runPhysics])
 
   // Ball release timer
   const lastDropTimeRef = useRef(0)
@@ -709,7 +734,7 @@ export default function ImpactPage() {
         </h1>
         <p className="text-white/50 text-sm mt-1 flex items-center justify-center gap-2">
           <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-          Live contributions from the last 24 hours
+          Live contributions from the last {timeWindowHours} hours
         </p>
       </div>
     </div>
