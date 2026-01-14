@@ -31,7 +31,7 @@ export default defineType({
     ],
     preview: {
         select: {
-            title: 'text',
+            title: 'Monthly Update',
             media: 'thumbnail'
         }
     }
