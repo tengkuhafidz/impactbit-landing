@@ -41,7 +41,7 @@ const CAMPAIGN_QUERY = `*[_type == "campaign" && id.current == $id][0]{
 /**
  * GROQ query to fetch all campaigns with populated organisations
  */
-const ALL_CAMPAIGNS_QUERY = `*[_type == "campaign"] | order(index asc) {
+const ALL_CAMPAIGNS_QUERY = `*[_type == "campaign"] | order(order asc) {
   _id,
   "id": id.current,
   order,
