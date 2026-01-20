@@ -9,6 +9,7 @@ import {
 import type { Campaign } from "@/lib/sanity/types"
 import Image from "next/image"
 import Link from "next/link"
+import { QRCodeSVG } from "qrcode.react"
 
 const BUBBLE_COLORS = [
   { bg: "from-emerald-400/90 to-teal-500/90", glow: "shadow-emerald-500/40" },
@@ -82,6 +83,12 @@ export default function ImpactPage() {
 
   // Drag state
   const [draggedBallId, setDraggedBallId] = useState<string | null>(null)
+  const [qrExpanded, setQrExpanded] = useState(false)
+
+  // Set QR expanded based on device type
+  useEffect(() => {
+    setQrExpanded(deviceType === 'desktop')
+  }, [deviceType])
   const dragRef = useRef<{
     ballId: string | null
     startX: number
@@ -727,8 +734,8 @@ export default function ImpactPage() {
         </div>
       </div>
 
-      {/* Title */}
-      <div className="absolute top-20 left-0 right-0 z-40 text-center pointer-events-none">
+      {/* Title and QR Card */}
+      <div className="absolute top-20 left-0 right-0 z-40 flex flex-col items-center">
         <h1 className="text-2xl md:text-3xl font-serif font-light text-white/90 drop-shadow-lg">
           Impact in Motion
         </h1>
@@ -736,6 +743,56 @@ export default function ImpactPage() {
           <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
           Live contributions from the last {timeWindowHours} hours
         </p>
+
+        {/* QR Card */}
+        <div
+          className="mt-4 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 overflow-hidden cursor-pointer transition-all hover:bg-white/15"
+          onClick={(e) => {
+            // If clicking on the header area, toggle expansion
+            const target = e.target as HTMLElement
+            if (target.closest('[data-qr-header]')) {
+              e.stopPropagation()
+              setQrExpanded(!qrExpanded)
+            } else {
+              // Otherwise navigate to impactbit.org
+              window.open('https://impactbit.org', '_blank')
+            }
+          }}
+        >
+          {/* Header - always visible */}
+          <div
+            data-qr-header
+            className="px-4 py-2 flex items-center cursor-pointer relative min-w-[180px]"
+          >
+            <p className="text-white/80 text-sm font-medium flex-1 text-center">Make an impact</p>
+            <svg
+              className={`w-4 h-4 transition-all absolute right-3 ${qrExpanded ? 'rotate-180 text-white/10' : 'text-white/60'}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+
+          {/* QR Code - collapsible */}
+          <div
+            className={`overflow-hidden transition-all duration-300 ${qrExpanded ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'
+              }`}
+          >
+            <div className="px-4 pb-3 flex flex-col items-center gap-2">
+              <div className="bg-white rounded-xl p-2">
+                <QRCodeSVG
+                  value="https://impactbit.org"
+                  size={120}
+                  level="H"
+                  includeMargin={false}
+                />
+              </div>
+              <p className="text-white/50 text-xs">impactbit.org</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
