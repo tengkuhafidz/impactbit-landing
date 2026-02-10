@@ -141,6 +141,19 @@ export function MonthlyImpactGoal({
     window.location.href = `https://impactbit.org/payment?campaign=${campaignSlug}&quantity=${selectedUnits}`
   }
 
+  let nudgeMessage: string | null = null
+  for (const option of impactOptions.slice(1)) {
+    const diff = option.units - quantity
+    if (diff === 0) {
+      nudgeMessage = `Alhamdulillah, you will be sponsoring ${option.label.toLowerCase()}`
+      break
+    }
+    if (diff === 1 || diff === 2) {
+      nudgeMessage = `${diff} more to sponsoring ${option.label.toLowerCase()}`
+      break
+    }
+  }
+
   return (
     <div className={cn(
       "w-full max-w-md md:max-w-xl mx-auto rounded-2xl bg-gradient-to-br from-primary/10 to-accent/8 border-2 border-primary/20 shadow-soft animate-scale-in overflow-hidden",
@@ -233,43 +246,12 @@ export function MonthlyImpactGoal({
           </>
         )}
       </div>
-
       {/* Expandable section */}
       <div className={cn(
         "overflow-hidden transition-all duration-300 ease-in-out",
         isExpanded ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"
       )}>
-        {!showConfirmation && !showCustomInput ? (
-          /* Options view - preset buttons + custom */
-          <div className="px-5 md:px-8 pb-5 md:pb-7 pt-4 border-t border-primary/10">
-            <p className="text-sm text-muted-foreground text-center mb-4">
-              Choose your monthly impact:
-            </p>
-            <div className="space-y-3">
-              {impactOptions.map((option, index) => {
-                const optionPrice = option.units * unitPrice
-
-                return (
-                  <button
-                    key={index}
-                    onClick={() => handleSelectOption(option.units)}
-                    className="w-full min-h-[3.5rem] h-auto py-3 px-4 rounded-xl font-medium transition-all duration-200 hover:shadow-soft flex items-center justify-between bg-primary hover:bg-primary/90 text-primary-foreground"
-                  >
-                    <span className="text-left break-words">{option.label}</span>
-                    <span className="whitespace-nowrap font-semibold">${optionPrice.toLocaleString()}/mo</span>
-                  </button>
-                )
-              })}
-              {/* Custom amount button */}
-              <button
-                onClick={handleCustomClick}
-                className="w-full min-h-[3.5rem] h-auto py-3 px-4 rounded-xl font-medium transition-all duration-200 hover:shadow-soft gradient-accent text-accent-foreground"
-              >
-                Choose a custom amount
-              </button>
-            </div>
-          </div>
-        ) : showCustomInput ? (
+        {
           /* Custom input view */
           <div className="px-5 md:px-8 pb-5 md:pb-7 pt-4 border-t border-primary/10 animate-slide-right">
             <p className="text-lg md:text-xl text-foreground text-center mb-5">
@@ -302,6 +284,13 @@ export function MonthlyImpactGoal({
               </button>
             </div>
 
+            {/* Nudge message */}
+            {nudgeMessage && (
+              <p className="text-sm text-primary font-medium text-center mb-4 animate-slide-right">
+                {nudgeMessage}
+              </p>
+            )}
+
             {/* Buttons */}
             <div className="space-y-3">
               <button
@@ -318,48 +307,7 @@ export function MonthlyImpactGoal({
               </button>
             </div>
           </div>
-        ) : (
-          /* Confirmation View - replaces only the options area */
-          <div className="px-5 md:px-8 pb-5 md:pb-7 pt-6 border-t border-primary/10 animate-slide-right">
-            <div className="p-4 bg-gradient-to-br from-primary/10 to-accent/10 rounded-xl mb-4 border border-primary/20">
-              <div className="text-center space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  You will be sponsoring
-                </p>
-                <div className="py-2">
-                  <div className="text-4xl md:text-5xl font-serif font-light text-foreground mb-1">
-                    {selectedUnits}
-                  </div>
-                  <div className="text-lg font-light text-foreground">
-                    {selectedUnits === 1 ? impactItem : `${impactItem}s`}
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground">every month</p>
-                <div className="pt-2 border-t border-border/50">
-                  <div className="text-xs text-muted-foreground mb-1">Monthly contribution</div>
-                  <div className="text-2xl font-semibold text-foreground">
-                    ${activePrice.toLocaleString()}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <button
-                onClick={handleStartImpact}
-                className="w-full py-3 text-base gradient-accent text-accent-foreground rounded-xl font-medium transition-all duration-200 hover:shadow-elegant"
-              >
-                Start This Impact
-              </button>
-              <button
-                onClick={handleGoBack}
-                className="w-full py-2.5 text-sm rounded-xl font-medium transition-all duration-200 hover:bg-secondary border border-border"
-              >
-                Back
-              </button>
-            </div>
-          </div>
-        )}
+        }
       </div>
     </div>
   )
