@@ -1,8 +1,8 @@
-import { client } from "@/sanity/lib/client"
-import { urlFor } from "@/sanity/lib/image"
-import { getCampaignStatsFromFirestore } from "@/lib/firebase/firestore"
-import { getCampaignStats } from "@/content/campaignStats"
-import type { Campaign, SanityCampaignRaw } from "./types"
+import {client} from "@/sanity/lib/client"
+import {urlFor} from "@/sanity/lib/image"
+import {getCampaignStatsFromFirestore} from "@/lib/firebase/firestore"
+import {getCampaignStats} from "@/content/campaignStats"
+import type {Campaign, SanityCampaignRaw} from "./types"
 
 /**
  * GROQ query to fetch a campaign with populated organisation
@@ -10,7 +10,7 @@ import type { Campaign, SanityCampaignRaw } from "./types"
 const CAMPAIGN_QUERY = `*[_type == "campaign" && id.current == $id][0]{
   _id,
   "id": id.current,
-  index,
+  order,
   title,
   description,
   impactDescription,
@@ -41,10 +41,10 @@ const CAMPAIGN_QUERY = `*[_type == "campaign" && id.current == $id][0]{
 /**
  * GROQ query to fetch all campaigns with populated organisations
  */
-const ALL_CAMPAIGNS_QUERY = `*[_type == "campaign"] | order(index asc) {
+const ALL_CAMPAIGNS_QUERY = `*[_type == "campaign"] | order(order asc) {
   _id,
   "id": id.current,
-  index,
+  order,
   title,
   description,
   impactDescription,
@@ -76,43 +76,43 @@ const ALL_CAMPAIGNS_QUERY = `*[_type == "campaign"] | order(index asc) {
  * Transform raw Sanity campaign data into the Campaign type used by the app
  */
 async function transformCampaign(rawCampaign: SanityCampaignRaw): Promise<Campaign> {
-  // Convert Sanity image object to URL string
-  const iconUrl = rawCampaign.iconPath
-    ? urlFor(rawCampaign.iconPath).width(200).height(200).url()
-    : ""
+    // Convert Sanity image object to URL string
+    const iconUrl = rawCampaign.iconPath
+        ? urlFor(rawCampaign.iconPath).width(200).height(200).url()
+        : ""
 
-  // Get stats from Firestore
-  const firestoreStats = await getCampaignStatsFromFirestore(rawCampaign.id)
+    // Get stats from Firestore
+    const firestoreStats = await getCampaignStatsFromFirestore(rawCampaign.id)
 
-  // Fallback to local stats if Firestore returns 0 or doesn't have data
-  const localStats = getCampaignStats(rawCampaign.id)
-  const totalImpactUnits = firestoreStats.totalUnitImpact > 0
-    ? firestoreStats.totalUnitImpact
-    : localStats.totalImpactUnits
+    // Fallback to local stats if Firestore returns 0 or doesn't have data
+    const localStats = getCampaignStats(rawCampaign.id)
+    const totalImpactUnits = firestoreStats.totalUnitImpact > 0
+        ? firestoreStats.totalUnitImpact
+        : localStats.totalImpactUnits
 
-  return {
-    id: rawCampaign.id,
-    index: rawCampaign.index,
-    title: rawCampaign.title,
-    description: rawCampaign.description,
-    impactDescription: rawCampaign.impactDescription,
-    impactItem: rawCampaign.impactItem,
-    impactPrompt: rawCampaign.impactPrompt,
-    unitPrice: rawCampaign.unitPrice,
-    iconPath: iconUrl,
-    url: rawCampaign.url,
-    unitImpact: rawCampaign.unitImpact,
-    targetMonthlyImpact: rawCampaign.targetMonthlyImpact,
-    monthlyImpact: firestoreStats.monthlyImpact || 0,
-    isFullySponsored: rawCampaign.isFullySponsored,
-    isFeatured: rawCampaign.isFeatured,
-    oneTimeUrl: rawCampaign.oneTimeUrl,
-    organisationId: rawCampaign.organisation?.id || "",
-    organisationName: rawCampaign.organisation?.name,
-    impactPromptAlt: rawCampaign.impactPromptAlt,
-    totalImpactUnits,
-    impactOptions: rawCampaign.impactOptions || []
-  }
+    return {
+        id: rawCampaign.id,
+        order: rawCampaign.order,
+        title: rawCampaign.title,
+        description: rawCampaign.description,
+        impactDescription: rawCampaign.impactDescription,
+        impactItem: rawCampaign.impactItem,
+        impactPrompt: rawCampaign.impactPrompt,
+        unitPrice: rawCampaign.unitPrice,
+        iconPath: iconUrl,
+        url: rawCampaign.url,
+        unitImpact: rawCampaign.unitImpact,
+        targetMonthlyImpact: rawCampaign.targetMonthlyImpact,
+        monthlyImpact: firestoreStats.monthlyImpact || 0,
+        isFullySponsored: rawCampaign.isFullySponsored,
+        isFeatured: rawCampaign.isFeatured,
+        oneTimeUrl: rawCampaign.oneTimeUrl,
+        organisationId: rawCampaign.organisation?.id || "",
+        organisationName: rawCampaign.organisation?.name,
+        impactPromptAlt: rawCampaign.impactPromptAlt,
+        totalImpactUnits,
+        impactOptions: rawCampaign.impactOptions || []
+    }
 }
 
 /**
@@ -121,25 +121,25 @@ async function transformCampaign(rawCampaign: SanityCampaignRaw): Promise<Campai
  * @returns Campaign data or null if not found
  */
 export async function getCampaign(id: string): Promise<Campaign | null> {
-  try {
-    const rawCampaign = await client.fetch<SanityCampaignRaw>(
-      CAMPAIGN_QUERY,
-      { id },
-      {
-        // Revalidate every 60 seconds
-        next: { revalidate: 60 }
-      }
-    )
+    try {
+        const rawCampaign = await client.fetch<SanityCampaignRaw>(
+            CAMPAIGN_QUERY,
+            {id},
+            {
+                // Revalidate every 60 seconds
+                next: {revalidate: 60}
+            }
+        )
 
-    if (!rawCampaign) {
-      return null
+        if (!rawCampaign) {
+            return null
+        }
+
+        return transformCampaign(rawCampaign)
+    } catch (error) {
+        console.error(`Error fetching campaign ${id}:`, error)
+        return null // Return null on error, will fallback to mockCampaigns
     }
-
-    return transformCampaign(rawCampaign)
-  } catch (error) {
-    console.error(`Error fetching campaign ${id}:`, error)
-    return null // Return null on error, will fallback to mockCampaigns
-  }
 }
 
 /**
@@ -147,21 +147,21 @@ export async function getCampaign(id: string): Promise<Campaign | null> {
  * @returns Array of Campaign data
  */
 export async function getAllCampaigns(): Promise<Campaign[]> {
-  try {
-    const rawCampaigns = await client.fetch<SanityCampaignRaw[]>(
-      ALL_CAMPAIGNS_QUERY,
-      {},
-      {
-        // Revalidate every 60 seconds
-        next: { revalidate: 60 }
-      }
-    )
+    try {
+        const rawCampaigns = await client.fetch<SanityCampaignRaw[]>(
+            ALL_CAMPAIGNS_QUERY,
+            {},
+            {
+                // Revalidate every 60 seconds
+                next: {revalidate: 60}
+            }
+        )
 
-    return Promise.all(rawCampaigns.map(transformCampaign))
-  } catch (error) {
-    console.error("Error fetching all campaigns:", error)
-    return []
-  }
+        return Promise.all(rawCampaigns.map(transformCampaign))
+    } catch (error) {
+        console.error("Error fetching all campaigns:", error)
+        return []
+    }
 }
 
 /**
@@ -169,18 +169,18 @@ export async function getAllCampaigns(): Promise<Campaign[]> {
  * @returns Array of campaign IDs
  */
 export async function getAllCampaignIds(): Promise<string[]> {
-  try {
-    const campaigns = await client.fetch<{ id: string }[]>(
-      `*[_type == "campaign"]{ "id": id.current }`,
-      {},
-      {
-        next: { revalidate: 3600 } // Revalidate every hour
-      }
-    )
+    try {
+        const campaigns = await client.fetch<{ id: string }[]>(
+            `*[_type == "campaign"]{ "id": id.current }`,
+            {},
+            {
+                next: {revalidate: 3600} // Revalidate every hour
+            }
+        )
 
-    return campaigns.map(c => c.id)
-  } catch (error) {
-    console.error("Error fetching campaign IDs:", error)
-    return []
-  }
+        return campaigns.map(c => c.id)
+    } catch (error) {
+        console.error("Error fetching campaign IDs:", error)
+        return []
+    }
 }
